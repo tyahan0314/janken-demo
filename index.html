@@ -2,105 +2,120 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>店長とジャンケン勝負！</title>
+  <title>〜店長とジャンケン勝負〜</title>
   <style>
     body {
       font-family: sans-serif;
       text-align: center;
-      padding: 10px;
-      background: #87ceeb;
+      background: #87CEEB; /* 水色背景 */
+      margin: 0;
+      padding: 0;
     }
-    .top-area {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 20px;
+    h1 {
+      margin-top: 20px;
     }
-    .tencho { width: 100px; }
-    .cpu-area { position: relative; width: 120px; }
-    .waku { width: 100%; }
-    .cpu-hand {
+    #boss {
       position: absolute;
-      top: 15%;
-      left: 15%;
-      width: 70%;
-      display: none;
+      top: 20px;
+      right: 20px;
+      width: 120px;
     }
-    .player-hand { margin-top: 10px; font-size: 2em; }
-    #result { font-size: 1.3em; margin: 15px 0; font-weight: bold; }
-    .btn-area { margin-top: 15px; }
-    button { font-size: 1.8em; margin: 8px; padding: 10px 15px; }
+    #frameArea {
+      position: absolute;
+      top: 100px;
+      left: 20px;
+      width: 150px;
+      height: 150px;
+    }
+    #frame {
+      width: 100%;
+    }
+    #bossHand {
+      position: absolute;
+      top: 30px;
+      left: 40px;
+      width: 80px;
+    }
+    #result {
+      margin-top: 300px;
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+    #score {
+      margin-top: 10px;
+      font-size: 1.2em;
+    }
+    #buttons {
+      margin-top: 20px;
+    }
+    #buttons button {
+      margin: 0 10px;
+      padding: 10px;
+      background: white;
+      border-radius: 10px;
+      border: 2px solid #ccc;
+    }
+    #buttons img {
+      width: 60px;
+    }
   </style>
 </head>
 <body>
   <h1>〜店長とジャンケン勝負〜</h1>
   <p>先に3回勝った方が勝ち！</p>
 
-  <div class="top-area">
-    <div class="cpu-area">
-      <img src="Jyanken-5.png" class="waku">
-      <img src="Jyanken-2.png" id="cpuHand" class="cpu-hand">
-    </div>
-    <img src="Jyanken-1.png" class="tencho"> <!-- ←ここはファイル名修正 -->
+  <!-- 店長 -->
+  <img src="./boss.png" id="boss">
+
+  <!-- 枠と店長の手 -->
+  <div id="frameArea">
+    <img src="./frame.png" id="frame">
+    <img src="./rock.png" id="bossHand">
   </div>
 
-  <div class="player-hand" id="playerHand">✊</div>
+  <!-- 勝敗表示 -->
+  <div id="result">勝負を選んでね！</div>
   <div id="score">あなた 0 - 店長 0</div>
-  <div id="result">ここに勝敗が出ます</div>
 
-  <div class="btn-area">
-    <button onclick="play('rock')">✊</button>
-    <button onclick="play('scissors')">✌️</button>
-    <button onclick="play('paper')">✋</button>
+  <!-- プレイヤーの手 -->
+  <div id="buttons">
+    <button onclick="play('rock')"><img src="./rock.png"></button>
+    <button onclick="play('scissors')"><img src="./scissors.png"></button>
+    <button onclick="play('paper')"><img src="./paper.png"></button>
   </div>
 
   <script>
-    const hands = {
-      rock: "Jyanken-2.png",
-      scissors: "Jyanken-3.png",
-      paper: "Jyanken-4.png"
-    };
-
     let playerScore = 0;
-    let cpuScore = 0;
-    let gameOver = false;
+    let bossScore = 0;
 
-    function play(player) {
-      if (gameOver) return; // 終了後は動かない
+    function play(playerChoice) {
+      if (playerScore >= 3 || bossScore >= 3) return;
 
-      document.getElementById("playerHand").textContent =
-        player === "rock" ? "✊" :
-        player === "scissors" ? "✌️" : "✋";
+      const choices = ['rock','scissors','paper'];
+      const bossChoice = choices[Math.floor(Math.random() * 3)];
 
-      const choices = ["rock", "scissors", "paper"];
-      const cpu = choices[Math.floor(Math.random() * 3)];
+      document.getElementById("bossHand").src = `./${bossChoice}.png`;
 
-      const cpuImg = document.getElementById("cpuHand");
-      cpuImg.src = hands[cpu];
-      cpuImg.style.display = "block";
-
-      let resultText = "";
-      if (player === cpu) {
-        resultText = "あいこ！";
+      if (playerChoice === bossChoice) {
+        document.getElementById("result").textContent = "あいこ！";
       } else if (
-        (player === "rock" && cpu === "scissors") ||
-        (player === "scissors" && cpu === "paper") ||
-        (player === "paper" && cpu === "rock")
+        (playerChoice === 'rock' && bossChoice === 'scissors') ||
+        (playerChoice === 'scissors' && bossChoice === 'paper') ||
+        (playerChoice === 'paper' && bossChoice === 'rock')
       ) {
-        resultText = "あなたの勝ち！";
         playerScore++;
+        document.getElementById("result").textContent = "あなたの勝ち！";
       } else {
-        resultText = "店長の勝ち！";
-        cpuScore++;
+        bossScore++;
+        document.getElementById("result").textContent = "店長の勝ち！";
       }
 
-      document.getElementById("score").textContent = `あなた ${playerScore} - 店長 ${cpuScore}`;
-      document.getElementById("result").textContent = resultText;
+      document.getElementById("score").textContent = `あなた ${playerScore} - 店長 ${bossScore}`;
 
-      if (playerScore === 3 || cpuScore === 3) {
-        gameOver = true;
-        document.getElementById("result").textContent += 
-          playerScore === 3 ? " 🎉ゲーム終了！あなたの勝利！" : " 💀ゲーム終了！店長の勝利！";
+      if (playerScore === 3) {
+        document.getElementById("result").textContent = "🎉 あなたの勝利！";
+      } else if (bossScore === 3) {
+        document.getElementById("result").textContent = "店長の勝利！";
       }
     }
   </script>
