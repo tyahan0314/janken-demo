@@ -6,113 +6,78 @@
   <title>店長とジャンケン勝負！</title>
   <style>
     /* ===== ベース ===== */
-    :root {
+    :root{
       --space-top: calc(env(safe-area-inset-top) + 8px);
       --radius: 12px;
+      /* 左右画像を中央寄りにする量（大きいほど内側） */
+      --side-gap: clamp(24px, 10vw, 88px);
     }
     body{
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      text-align: center;
-      background: #87CEEB;
-      margin: 0; padding: 0;
+      font-family: system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+      text-align:center; background:#87CEEB; margin:0; padding:0;
     }
-    h1{
-      margin: clamp(8px,2.6vw,16px) 0 0;
-      font-size: clamp(18px,6vw,28px);
-    }
-    .top-note{
-      margin: 4px 0 0;
-      font-size: clamp(12px,3.8vw,16px);
-      opacity: .9;
-    }
+    h1{ margin: clamp(8px,2.6vw,16px) 0 0; font-size: clamp(18px,6vw,28px); }
+    .top-note{ margin:4px 0 0; font-size:clamp(12px,3.8vw,16px); opacity:.9; }
 
-    /* ===== 右上：店長、左上：店長の手（枠） ===== */
+    /* ===== 右上：店長 ===== */
     #boss{
-      position: fixed;
-      top: var(--space-top);
-      right: 10px;
-      width: clamp(72px,18vw,120px);
-      z-index: 5;
-      user-select: none;
-      -webkit-user-drag: none;
+      position:fixed; top:var(--space-top); right:var(--side-gap);
+      width:clamp(72px,18vw,120px); z-index:5;
+      user-select:none; -webkit-user-drag:none;
     }
+    /* ===== 左上：店長の手（枠） ===== */
     #frame{
-      position: fixed;
-      top: var(--space-top);
-      left: 10px;
-      width: clamp(84px,22vw,140px);
-      height: clamp(84px,22vw,140px);
-      background: url('frame.png') no-repeat center/contain;
-      display: flex; align-items: center; justify-content: center;
-      z-index: 4;
-      user-select: none;
+      position:fixed; top:var(--space-top); left:var(--side-gap);
+      width:clamp(84px,22vw,140px); height:clamp(84px,22vw,140px);
+      background:url('frame.png') no-repeat center/contain;
+      display:flex; align-items:center; justify-content:center; z-index:4;
+      user-select:none;
     }
-    #cpuHand{
-      width: 70%;
-      height: auto;
-      display: none; /* 初期は手を非表示（枠だけ） */
-      -webkit-user-drag: none;
-    }
+    #cpuHand{ width:70%; height:auto; display:none; -webkit-user-drag:none; }
 
     /* ===== 中央エリア ===== */
     #gameArea{
-      min-height: 60vh;
-      margin-top: clamp(120px,28vw,200px); /* 上の固定要素と干渉しない */
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: flex-start;
-      gap: clamp(8px,2.6vw,16px);
-      padding: 0 12px 24px;
+      /* 上の固定画像と被らない程度に、全体の余白はコンパクトに */
+      margin-top: clamp(96px,24vw,170px);
+      min-height:auto;
+      padding: 0 12px clamp(16px,3vh,24px);
+      display:flex; flex-direction:column; align-items:center; gap:clamp(6px,2.2vw,12px);
     }
-    #score{
-      font-size: clamp(16px,4.8vw,22px);
-      font-weight: 700;
-    }
-    #result{
-      font-size: clamp(14px,4.5vw,20px);
-      line-height: 1.5;
-      min-height: 1.5em;
-    }
+    #score{ font-size:clamp(16px,4.8vw,22px); font-weight:700; }
+    #result{ font-size:clamp(14px,4.5vw,20px); line-height:1.5; min-height:1.5em; }
 
     /* 手ボタン */
-    #choices{ display: flex; gap: clamp(10px,4vw,16px); }
+    #choices{ display:flex; gap:clamp(10px,4vw,16px); }
     #choices button{
-      font-size: clamp(24px,8.5vw,38px);
-      padding: clamp(8px,2.8vw,12px) clamp(10px,3.6vw,16px);
-      border: none; border-radius: var(--radius);
-      background: #fff;
-      box-shadow: 0 2px 0 rgba(0,0,0,.12);
-      cursor: pointer;
-      transition: transform .06s ease-in-out;
+      font-size:clamp(24px,8.5vw,38px);
+      padding:clamp(8px,2.8vw,12px) clamp(10px,3.6vw,16px);
+      border:none; border-radius:var(--radius);
+      background:#fff; box-shadow:0 2px 0 rgba(0,0,0,.12);
+      cursor:pointer; transition:transform .06s;
     }
-    #choices button:active{ transform: translateY(1px); }
+    #choices button:active{ transform:translateY(1px); }
 
-    /* 合言葉・再挑戦 */
+    /* 合言葉＆再挑戦 */
     #keywordBox{
-      display: none;
-      margin-top: clamp(8px,2.8vw,12px);
-      padding: clamp(8px,2.8vw,12px) clamp(12px,4vw,16px);
-      background: #fff;
-      border-radius: var(--radius);
-      font-size: clamp(14px,4.2vw,18px);
-      box-shadow: 0 2px 0 rgba(0,0,0,.08);
+      display:none; margin-top:clamp(8px,2.8vw,12px);
+      padding:clamp(10px,3vw,14px) clamp(14px,4.5vw,18px);
+      background:#fff; border-radius:var(--radius);
+      font-size:clamp(14px,4.2vw,18px);
+      box-shadow:0 2px 0 rgba(0,0,0,.08);
+      max-width:min(92vw,520px);
     }
-    #keywordBox .kw-note{ margin-top: 6px; font-size: .9em; opacity: .85; }
-    #copyKw{
-      margin-left: 8px; padding: 6px 10px; font-size: .95em;
-      border: none; border-radius: 8px; background: #efefef; cursor: pointer;
-    }
+    #keywordBox .kw-note{ margin-top:6px; font-size:.9em; opacity:.85; }
+    #copyKw{ margin-left:8px; padding:6px 10px; font-size:.95em; border:none; border-radius:8px; background:#efefef; cursor:pointer; }
+
     #retry{
-      display: none;
-      margin: clamp(10px,3vw,16px) auto 0;
-      padding: clamp(10px,3vw,14px) clamp(16px,4.5vw,22px);
-      font-size: clamp(14px,4.5vw,18px);
-      background: #ff7f7f; color: #fff;
-      border: none; border-radius: var(--radius); cursor: pointer;
+      display:none; margin:clamp(10px,3vw,16px) auto 0;
+      padding:clamp(10px,3vw,14px) clamp(16px,4.5vw,22px);
+      font-size:clamp(14px,4.5vw,18px);
+      background:#ff7f7f; color:#fff; border:none; border-radius:var(--radius); cursor:pointer;
     }
 
-    /* 横幅が広めの端末で少し締める */
-    @media (min-width: 640px){
-      #gameArea{ max-width: 520px; margin-left:auto; margin-right:auto; }
+    @media (min-width:640px){
+      #gameArea{ max-width:520px; margin-left:auto; margin-right:auto; }
     }
   </style>
 </head>
@@ -121,9 +86,7 @@
   <p class="top-note">先に3回勝った方が勝ち！</p>
 
   <img id="boss" src="boss.png" alt="店長">
-  <div id="frame">
-    <img id="cpuHand" alt="店長の手">
-  </div>
+  <div id="frame"><img id="cpuHand" alt="店長の手"></div>
 
   <div id="gameArea">
     <div id="score">あなた 0 - 店長 0</div>
@@ -145,24 +108,19 @@
   </div>
 
   <script>
-    /* ==== 店長の強さ（勝ち手を出す確率） ==== */
-    const BOSS_SMART_RATE = 0.75; // 例: 0.6=やや弱い / 0.75=強め / 0.85=かなり強い
+    /* 店長の強さ（勝ち手を出す確率） — 数字を上げるほど強くなる */
+    const BOSS_SMART_RATE = 0.8; // 0.6〜0.9 で調整推奨
     const KEYWORD = 'ボリューミー店長';
 
-    /* ==== 状態 ==== */
-    let playerScore = 0;
-    let bossScore = 0;
-    let gameOver = false;
+    let playerScore = 0, bossScore = 0, gameOver = false;
 
-    /* ==== 店長の手決定 ==== */
-    function cpuChoice(player) {
-      const counter = (h) => (h === 'rock' ? 'paper' : h === 'scissors' ? 'rock' : 'scissors');
-      const rnd = () => ['rock', 'scissors', 'paper'][Math.floor(Math.random() * 3)];
+    function cpuChoice(player){
+      const counter = (h)=> (h==='rock'?'paper': h==='scissors'?'rock':'scissors');
+      const rnd = ()=> ['rock','scissors','paper'][Math.floor(Math.random()*3)];
       return Math.random() < BOSS_SMART_RATE ? counter(player) : rnd();
     }
 
-    /* ==== 1ターン実行 ==== */
-    function play(playerHand) {
+    function play(playerHand){
       if (gameOver) return;
 
       const bossHand = cpuChoice(playerHand);
@@ -170,64 +128,53 @@
       cpuImg.src = bossHand + '.png';
       cpuImg.style.display = 'block';
 
-      let result;
-      if (
-        (playerHand === 'rock' && bossHand === 'scissors') ||
-        (playerHand === 'scissors' && bossHand === 'paper') ||
-        (playerHand === 'paper' && bossHand === 'rock')
-      ) {
-        playerScore++; result = 'あなたの勝ち！';
-      } else if (playerHand === bossHand) {
-        result = 'あいこ！';
-      } else {
-        bossScore++; result = '店長の勝ち！';
-      }
+      let msg;
+      const win = (playerHand==='rock'&&bossHand==='scissors')||
+                  (playerHand==='scissors'&&bossHand==='paper')||
+                  (playerHand==='paper'&&bossHand==='rock');
+      if (win){ playerScore++; msg='あなたの勝ち！'; }
+      else if (playerHand===bossHand){ msg='あいこ！'; }
+      else { bossScore++; msg='店長の勝ち！'; }
 
-      document.getElementById('result').textContent = result;
+      document.getElementById('result').textContent = msg;
       document.getElementById('score').textContent = `あなた ${playerScore} - 店長 ${bossScore}`;
 
-      if (playerScore === 3) endGame(true);
-      if (bossScore === 3) endGame(false);
+      if (playerScore===3) endGame(true);
+      if (bossScore===3) endGame(false);
     }
 
-    /* ==== 終了処理 ==== */
-    function endGame(playerWon) {
+    function endGame(playerWon){
       gameOver = true;
-      // 手ボタンを隠す
       document.getElementById('choices').style.display = 'none';
-      // 再挑戦ボタンを出す
       document.getElementById('retry').style.display = 'block';
 
       const kwBox = document.getElementById('keywordBox');
-      if (playerWon) {
+      if (playerWon){
         document.getElementById('result').textContent = '🎉 あなたの勝ち！';
         document.getElementById('keywordText').textContent = KEYWORD;
-        kwBox.style.display = 'inline-block';  // 合言葉を表示
-      } else {
-        document.getElementById('result').textContent = '店長の勝ち！ゲーム終了！';
-        kwBox.style.display = 'none';          // 負けなら合言葉は出さない
+        kwBox.style.display = 'inline-block';
+      }else{
+        document.getElementById('result').textContent = '店長の勝ち！ ゲーム終了！';
+        kwBox.style.display = 'none';
       }
     }
 
-    /* ==== リセット ==== */
-    function resetGame() {
-      gameOver = false;
-      playerScore = 0; bossScore = 0;
+    function resetGame(){
+      gameOver = false; playerScore = 0; bossScore = 0;
       document.getElementById('score').textContent = 'あなた 0 - 店長 0';
       document.getElementById('result').textContent = '';
       document.getElementById('cpuHand').style.display = 'none';
       document.getElementById('retry').style.display = 'none';
       document.getElementById('keywordBox').style.display = 'none';
       document.getElementById('choices').style.display = 'flex';
+      window.scrollTo({top:0, behavior:'smooth'});
     }
 
-    /* ==== 合言葉コピー ==== */
     function copyKeyword(){
       const btn = document.getElementById('copyKw');
       navigator.clipboard?.writeText(KEYWORD).then(()=>{
-        const old = btn.textContent;
-        btn.textContent = 'コピー済み';
-        setTimeout(()=> btn.textContent = old, 1200);
+        const t = btn.textContent; btn.textContent='コピー済み';
+        setTimeout(()=> btn.textContent=t, 1200);
       });
     }
   </script>
