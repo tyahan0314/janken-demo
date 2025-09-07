@@ -6,271 +6,305 @@
 <title>店長とジャンケン勝負！</title>
 <style>
   :root{
-    --bg: #8fd0e6;
-    --ink: #222;
-    --muted: #4b6b78;
-    --card: #fff;
-    --accent: #ff7f8a;
-    --btn: #ffffff;
-    --btn-ink:#222;
-    --radius: 14px;
-    --space-top: calc(env(safe-area-inset-top, 0px) + 10px);
-    /* 左右の寄せ具合。もっと中央寄りにしたければ 8vw → 6vw などに */
-    --side-gap: clamp(16px, 8vw, 72px);
+    /* ヒーロー領域（上部）のサイズ感：スマホ基準で大きめ＋可変 */
+    --hero-h:    clamp(150px, 32vh, 280px);
+    --boss-w:    clamp(120px, 32vw, 220px);
+    --frame-w:   clamp(120px, 30vw, 210px);
+    --hero-gap:  clamp(24px, 7vw, 48px);   /* 2人の間の距離 */
+    --pad-x:     clamp(12px, 4vw, 20px);
+    --pad-y:     clamp(12px, 3vh, 20px);
+
+    --accent: #ff7f9a;
+    --bg: #8ed0e6;
+    --card: #ffffff;
+    --ink: #1e293b;
+    --ink-weak:#334155;
+    --shadow: 0 8px 22px rgba(0,0,0,.12);
+    --round: 14px;
   }
 
-  html,body{ height:100%; }
+  *{box-sizing:border-box}
   body{
-    margin:0; font-family: -apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN",
-    "Segoe UI",Roboto,Helvetica,Arial,"Noto Sans JP","Apple Color Emoji","Segoe UI Emoji",sans-serif;
-    color:var(--ink); background:var(--bg);
-    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+    margin:0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+    color:var(--ink);
+    background:var(--bg);
+  }
+  #app{
+    min-height:100vh;
+    padding: var(--pad-y) var(--pad-x) calc(var(--pad-y)*2.2);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap: clamp(8px, 1.8vh, 16px);
   }
 
-  /* 右上：店長（大きめ） */
-  #boss{
-    position: fixed; top: var(--space-top); right: var(--side-gap);
-    width: clamp(110px, 28vw, 180px);
-    z-index: 5; user-select:none; -webkit-user-drag:none; pointer-events:none;
+  /* ここが新：上部ヒーロー行（左右の画像を中央寄り＆大きめ） */
+  .hero{
+    width:100%;
+    height:var(--hero-h);
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    column-gap: var(--hero-gap);
+    position:relative;
+    margin-top: clamp(4px, 0.8vh, 10px);
   }
-
-  /* 左上：店長の手（枠の中に手画像） */
-  #frame{
-    position: fixed; top: var(--space-top); left: var(--side-gap);
-    width: clamp(130px, 34vw, 200px); height: clamp(130px, 34vw, 200px);
-    background: url('frame.png') no-repeat center / contain;
-    display:flex; align-items:center; justify-content:center;
-    z-index:4; user-select:none; pointer-events:none;
+  .hero .cpuBox{
+    width:var(--frame-w);
+    aspect-ratio: 3/4;
+    position:relative;
   }
-  #cpuHand{ width:78%; height:auto; display:none; -webkit-user-drag:none; }
-
-  /* 中央ゲームエリア。上で2枚を大きくした分だけ開始位置を下げる */
-  #wrap{ max-width: 680px; margin: 0 auto; padding: 0 12px; }
-  #gameArea{
-    margin-top: clamp(140px, 36vw, 260px);
-    display:flex; flex-direction:column; align-items:center; gap: clamp(10px, 2.8vw, 16px);
-    padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  .hero .cpuBox img.frame{
+    position:absolute; inset:0;
+    width:100%; height:100%; object-fit:contain;
+    user-select:none; -webkit-user-drag:none;
+  }
+  .hero .cpuBox img.hand{
+    position:absolute; inset:0;
+    width:70%; height:70%; object-fit:contain;
+    margin:auto;
+    display:block;
+    user-select:none; -webkit-user-drag:none;
+  }
+  .hero img.boss{
+    width:var(--boss-w);
+    height:auto;
+    object-fit:contain;
+    user-select:none; -webkit-user-drag:none;
   }
 
   h1{
-    margin: 8px 0 0; font-size: clamp(22px, 6vw, 40px); text-align:center;
+    margin: 0;
+    font-size: clamp(22px, 5.8vw, 34px);
+    letter-spacing: .04em;
+    text-align:center;
+    line-height:1.25;
   }
-  .sub{ margin: 4px 0 4px; text-align:center; color: var(--muted); font-size: clamp(12px, 3.3vw, 16px); }
+  .sub{
+    margin: 0;
+    font-size: clamp(12px, 3.4vw, 16px);
+    color: var(--ink-weak);
+    text-align:center;
+  }
 
-  #score{ font-size: clamp(20px, 5.6vw, 32px); margin-top: 6px; text-align:center; }
-  #result{ font-size: clamp(16px, 4.5vw, 22px); text-align:center; min-height: 1.6em; }
+  #score{
+    margin-top: clamp(4px, 1vh, 10px);
+    font-size: clamp(20px, 6vw, 28px);
+    font-weight: 800;
+    text-align:center;
+  }
 
   /* 手ボタン */
-  #choices{ display:flex; gap: clamp(14px, 4.5vw, 22px); margin-top: 6px; }
-  #choices button{
-    appearance:none; border:0; background:var(--btn); color:var(--btn-ink);
-    width: clamp(76px, 22vw, 110px); height: clamp(64px, 18vw, 86px);
-    border-radius: var(--radius); font-size: clamp(26px, 7vw, 36px);
-    box-shadow: 0 3px 10px rgba(0,0,0,.12); cursor:pointer;
-    transition: transform .06s ease; touch-action: manipulation;
-    min-width:44px; min-height:44px;
+  .handRow{
+    display:flex; gap: clamp(14px, 4.2vw, 22px);
+    margin-top: clamp(10px, 2.4vh, 16px);
   }
-  #choices button:active{ transform: scale(.96); }
-  #choices.hidden{ display:none; }
+  .handBtn{
+    width: clamp(90px, 26vw, 140px);
+    height: clamp(68px, 18vw, 100px);
+    border: 0;
+    border-radius: var(--round);
+    background: var(--card);
+    box-shadow: var(--shadow);
+    font-size: clamp(30px, 9vw, 40px);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .handBtn:active{ transform: translateY(1px) }
 
-  /* 合言葉カード（勝ったときだけ表示） */
-  #keywordCard{
-    display:none; background:var(--card); color:var(--ink);
-    border-radius: calc(var(--radius) + 4px);
-    padding: clamp(10px, 3.6vw, 18px) clamp(12px, 4vw, 22px);
-    box-shadow: 0 6px 24px rgba(0,0,0,.12);
-    margin-top: clamp(8px, 2.5vw, 14px);
-    text-align: left; width: min(92vw, 540px);
+  /* 結果表示＆合言葉カード */
+  #result{ 
+    margin-top: clamp(8px, 1.8vh, 14px);
+    font-size: clamp(16px, 4.4vw, 20px);
+    text-align:center;
   }
-  #kwRow{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-  #kwText{ font-weight:700; font-size: clamp(16px, 4.8vw, 22px); }
-  #copyBtn{
-    margin-left:auto; appearance:none; border:0; background:#e9eef9; color:#1c3b6b;
-    padding: 6px 12px; border-radius: 999px; font-size: clamp(12px, 3.6vw, 14px); cursor:pointer;
+  .keywordCard{
+    display:none;
+    margin-top: clamp(8px, 1.8vh, 14px);
+    background: var(--card);
+    color: var(--ink);
+    border-radius: var(--round);
+    box-shadow: var(--shadow);
+    padding: clamp(12px, 3.4vw, 18px);
+    width: min(92%, 560px);
   }
-  .note{ color:#6b7b86; font-size: clamp(12px, 3.6vw, 14px); margin-top:6px; }
+  .kwTop{ display:flex; justify-content:space-between; align-items:center; gap:12px }
+  .kwWord{ font-weight:800; font-size: clamp(16px, 5vw, 22px) }
+  .copyBtn{
+    padding: 8px 14px;
+    border-radius: 12px;
+    border: 0;
+    background: #e6eef7;
+    color: #0f172a;
+    font-weight: 700;
+  }
+  .kwHint{ margin-top:8px; color:var(--ink-weak); font-size: clamp(12px, 3.6vw, 14px) }
 
   /* 再挑戦 */
   #retry{
-    display:none; margin-top: clamp(14px, 4.6vw, 20px);
-    background: #ff9aa3; color:#fff; border:0; padding: 12px 24px;
-    border-radius: 999px; font-weight: 700; font-size: clamp(14px, 4.2vw, 16px);
-    box-shadow: 0 8px 18px rgba(255,140,150,.35); cursor:pointer;
-    touch-action: manipulation;
+    display:none;
+    margin: clamp(12px, 2.8vh, 18px) auto 0;
+    padding: 12px 24px;
+    font-weight:800;
+    border-radius: 999px;
+    border:0;
+    color:white;
+    background: var(--accent);
+    box-shadow: var(--shadow);
   }
 
-  /* アニメ控えめ設定 */
-  @media (prefers-reduced-motion: reduce){
-    #choices button{ transition:none; }
-  }
+  /* 下の余白を詰めるため、最後に少しだけ余白 */
+  .spacer{ height: clamp(12px, 2vh, 20px) }
 </style>
 </head>
 <body>
-  <!-- 上部の飾り画像 -->
-  <img id="boss" src="boss.png" alt="" />
-  <div id="frame" aria-hidden="true">
-    <img id="cpuHand" alt="" />
-  </div>
+  <main id="app">
 
-  <div id="wrap">
-    <div id="gameArea">
-      <h1>〜店長とジャンケン勝負〜</h1>
-      <div class="sub">先に3回勝った方が勝ち！</div>
-
-      <div id="score">あなた 0 - 店長 0</div>
-      <div id="result" aria-live="polite"></div>
-
-      <div id="choices" role="group" aria-label="手を選んでください">
-        <button data-hand="rock" aria-label="グー">✊</button>
-        <button data-hand="scissors" aria-label="チョキ">✌️</button>
-        <button data-hand="paper" aria-label="パー">🖐️</button>
+    <!-- ヒーロー：中央寄りで大きく -->
+    <section class="hero">
+      <div class="cpuBox" aria-label="店長の手">
+        <img class="frame" src="frame.png" alt="">
+        <img id="cpuHand" class="hand" src="" alt="店長の手">
       </div>
+      <img class="boss" src="boss.png" alt="店長">
+    </section>
 
-      <!-- 勝った時だけ出す -->
-      <div id="keywordCard" role="status" aria-live="polite">
-        <div id="kwRow">
-          <div id="kwText">合言葉：ボリューミー店長</div>
-          <button id="copyBtn" type="button">コピー</button>
-        </div>
-        <div class="note">LINEのトークでこの合言葉を送ってね</div>
-      </div>
+    <h1>〜店長とジャンケン勝負〜</h1>
+    <p class="sub">先に3回勝った方が勝ち！</p>
 
-      <button id="retry" type="button">再挑戦</button>
+    <div id="score">あなた 0 - 店長 0</div>
+
+    <div class="handRow" id="handRow">
+      <button class="handBtn" data-hand="rock"     aria-label="グー">✊</button>
+      <button class="handBtn" data-hand="scissors" aria-label="チョキ">✌️</button>
+      <button class="handBtn" data-hand="paper"    aria-label="パー">🖐️</button>
     </div>
-  </div>
+
+    <div id="result" aria-live="polite"></div>
+
+    <div class="keywordCard" id="kw">
+      <div class="kwTop">
+        <div class="kwWord">合言葉：<b>ボリューミー店長</b></div>
+        <button class="copyBtn" id="copy">コピー</button>
+      </div>
+      <div class="kwHint">LINEのトークでこの合言葉を送ってね</div>
+    </div>
+
+    <button id="retry">再挑戦</button>
+    <div class="spacer"></div>
+  </main>
 
 <script>
-  // ========= 設定 =========
-  // 店長の「勝ち手を出す確率」。50%にしたい時は 0.5、強めは 0.75 推奨。
-  const BOSS_SMART_RATE = 0.75;
+  // ============== 画像マップ ==============
+  const imgMap = {
+    rock: 'rock.png',
+    scissors: 'scissors.png',
+    paper: 'paper.png'
+  };
+  function handToImg(h){ return imgMap[h]; }
 
-  // ========= 画像の先読み =========
-  ['rock.png','scissors.png','paper.png','boss.png','frame.png'].forEach(src=>{
-    const i = new Image(); i.src = src;
-  });
+  // ============== 要素参照 ==============
+  const cpuImg   = document.getElementById('cpuHand');
+  const scoreEl  = document.getElementById('score');
+  const resultEl = document.getElementById('result');
+  const rowEl    = document.getElementById('handRow');
+  const retryBtn = document.getElementById('retry');
+  const kwCard   = document.getElementById('kw');
+  const copyBtn  = document.getElementById('copy');
 
-  // ========= 参照 =========
-  const scoreEl   = document.getElementById('score');
-  const resultEl  = document.getElementById('result');
-  const choicesEl = document.getElementById('choices');
-  const cpuImg    = document.getElementById('cpuHand');
-  const keyword   = document.getElementById('keywordCard');
-  const copyBtn   = document.getElementById('copyBtn');
-  const retryBtn  = document.getElementById('retry');
+  let player = 0, cpu = 0, finished = false;
 
-  // ========= 状態 =========
-  let you = 0, boss = 0;
-  let gameOver = false;
-  let clickLock = false;
+  // 開始時に店長の手を見せる（ランダム）
+  (function showInit(){
+    const pool = ['rock','scissors','paper'];
+    const init = pool[Math.floor(Math.random()*pool.length)];
+    cpuImg.src = handToImg(init);
+  })();
 
-  // ========= ユーティリティ =========
-  function handToImg(hand){
-    if(hand==='rock') return 'rock.png';
-    if(hand==='scissors') return 'scissors.png';
-    return 'paper.png';
-  }
-  function judge(a,b){
-    if(a===b) return 0;
-    if(
-      (a==='rock'     && b==='scissors') ||
-      (a==='scissors' && b==='paper')    ||
-      (a==='paper'    && b==='rock')
-    ) return 1; // player win
-    return -1;   // boss win
-  }
+  // 50%でランダム、50%で勝ち手を出すロジック
   function cpuChoice(playerHand){
-    // 一部ランダム・一部で「プレイヤーに勝つ手」
-    const r = Math.random();
-    if(r < BOSS_SMART_RATE){
-      // 勝つ手を出す
+    if(Math.random() < 0.5){
+      const r = ['rock','scissors','paper'][Math.floor(Math.random()*3)];
+      return r;
+    }else{
       if(playerHand==='rock')     return 'paper';
       if(playerHand==='scissors') return 'rock';
-      return 'scissors'; // player = paper
-    }else{
-      const pool = ['rock','scissors','paper'];
-      return pool[Math.floor(Math.random()*3)];
+      return 'scissors'; // player===paper
     }
   }
+
   function updateScore(){
-    scoreEl.textContent = `あなた ${you} - 店長 ${boss}`;
-  }
-  function vibrate(pattern){
-    if(navigator.vibrate) try{ navigator.vibrate(pattern); }catch(_){}
+    scoreEl.textContent = `あなた ${player} - 店長 ${cpu}`;
   }
 
-  // ========= メイン処理 =========
-  function play(hand){
-    if(gameOver || clickLock) return;
-    clickLock = true;
+  function endGame(win){
+    finished = true;
+    // ボタン無効化
+    [...rowEl.querySelectorAll('button')].forEach(b=>b.disabled=true);
+    retryBtn.style.display = 'inline-block';
+    if(win){
+      resultEl.textContent = '🎉 あなたの勝ち！';
+      kwCard.style.display = 'block';
+    }else{
+      resultEl.textContent = '店長の勝ち！';
+      kwCard.style.display = 'none';
+    }
+  }
 
-    const bossHand = cpuChoice(hand);
-    cpuImg.src = handToImg(bossHand);
-    cpuImg.style.display = 'block';
+  // 手ボタンのクリック
+  rowEl.addEventListener('click', (e)=>{
+    const btn = e.target.closest('button[data-hand]');
+    if(!btn || finished) return;
 
-    const result = judge(hand, bossHand);
-    if(result === 1){ you++; resultEl.textContent = '🎉 あなたの勝ち！'; vibrate(60); }
-    else if(result === -1){ boss++; resultEl.textContent = '店長の勝ち！'; vibrate([20,40,20]); }
-    else{ resultEl.textContent = '引き分け！'; }
+    const p = btn.dataset.hand;
+    const c = cpuChoice(p);
+    cpuImg.src = handToImg(c);
 
+    // 勝敗判定
+    let msg = '';
+    if(p===c){
+      msg = '引き分け！';
+    }else if(
+      (p==='rock'     && c==='scissors') ||
+      (p==='scissors' && c==='paper')    ||
+      (p==='paper'    && c==='rock')
+    ){
+      player++;
+      msg = 'あなたの勝ち！';
+    }else{
+      cpu++;
+      msg = '店長の勝ち！';
+    }
+    resultEl.textContent = msg;
     updateScore();
 
-    if(you >= 3 || boss >= 3){
-      endGame(you > boss);
-    }
+    if(player>=3) endGame(true);
+    else if(cpu>=3) endGame(false);
+  });
 
-    setTimeout(()=>{ clickLock = false; }, 180);
-  }
-
-  function endGame(playerWon){
-    gameOver = true;
-    choicesEl.classList.add('hidden');
-    retryBtn.style.display = 'inline-block';
-    if(playerWon){
-      keyword.style.display = 'block';
-      resultEl.textContent = '🎉 あなたの勝ち！';
-    }else{
-      keyword.style.display = 'none';
-      resultEl.textContent = '店長の勝ち！ ゲーム終了！';
-    }
-  }
-
-  function resetGame(){
-    you = 0; boss = 0; gameOver = false; clickLock = false;
+  retryBtn.addEventListener('click', ()=>{
+    player=cpu=0; finished=false;
     updateScore();
     resultEl.textContent = '';
-    choicesEl.classList.remove('hidden');
+    kwCard.style.display = 'none';
     retryBtn.style.display = 'none';
-    keyword.style.display = 'none';
-    cpuImg.style.display = 'none';
-  }
-
-  // ========= イベント =========
-  choicesEl.addEventListener('click', (e)=>{
-    const btn = e.target.closest('button[data-hand]');
-    if(!btn) return;
-    play(btn.dataset.hand);
+    // ボタン復活
+    [...rowEl.querySelectorAll('button')].forEach(b=>b.disabled=false);
+    // 初期手も更新して少し演出
+    const pool = ['rock','scissors','paper'];
+    cpuImg.src = handToImg(pool[Math.floor(Math.random()*3)]);
   });
 
-  retryBtn.addEventListener('click', resetGame);
-
+  // 合言葉コピー
   copyBtn.addEventListener('click', async ()=>{
-    const text = 'ボリューミー店長';
     try{
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText('ボリューミー店長');
       copyBtn.textContent = 'コピー済み';
-      setTimeout(()=>{ copyBtn.textContent = 'コピー'; }, 1200);
-    }catch(_){
-      // フォールバック
-      const ta = document.createElement('textarea');
-      ta.value = text; document.body.appendChild(ta);
-      ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-      copyBtn.textContent = 'コピー済み';
-      setTimeout(()=>{ copyBtn.textContent = 'コピー'; }, 1200);
+      setTimeout(()=>copyBtn.textContent='コピー', 1200);
+    }catch(e){
+      alert('コピーできませんでした');
     }
   });
-
-  // 初期表示
-  updateScore();
 </script>
 </body>
 </html>
