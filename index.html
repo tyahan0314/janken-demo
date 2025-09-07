@@ -6,18 +6,14 @@
   <style>
     body {
       font-family: sans-serif;
-      background-color: #87CEEB;
+      background: #87CEEB;
       margin: 0;
       padding: 0;
       text-align: center;
     }
+
     h1 {
       margin-top: 20px;
-      font-size: 1.6em;
-    }
-    h2 {
-      font-size: 1em;
-      margin: 5px 0 20px;
     }
 
     /* 店長画像（右上固定） */
@@ -25,146 +21,145 @@
       position: absolute;
       top: 10px;
       right: 10px;
-      width: 80px;
+      width: 100px;
     }
 
-    /* 枠と手（左上） */
+    /* 店長の手（左上固定・枠付き） */
     #frame {
       position: absolute;
-      top: 80px;
+      top: 10px;
       left: 10px;
       width: 120px;
-    }
-    #bossHand {
-      position: absolute;
-      top: 105px;
-      left: 35px;
-      width: 70px;
-    }
-
-    /* スコア・メッセージ */
-    #score {
-      margin-top: 220px;
-      font-size: 1.2em;
-      font-weight: bold;
-    }
-    #result {
-      margin-top: 10px;
-      font-size: 1.1em;
-    }
-    #keyword {
-      margin-top: 10px;
-      font-size: 1.2em;
-      color: red;
-      font-weight: bold;
-    }
-
-    /* ボタン */
-    .buttons {
-      margin-top: 40px;
+      height: 120px;
+      background: url('frame.png') no-repeat center/contain;
       display: flex;
+      align-items: center;
       justify-content: center;
-      gap: 20px;
     }
-    button {
-      font-size: 2em;
-      padding: 10px 20px;
-      border-radius: 10px;
-      border: none;
-      background: white;
-      cursor: pointer;
+
+    #cpuHand {
+      width: 90px;
+      height: auto;
     }
+
+    /* スコアと結果は中央に */
+    #score, #result {
+      margin-top: 180px;
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+
+    /* プレイヤーの選択肢 */
+    #choices {
+      margin-top: 20px;
+    }
+
+    #choices button {
+      margin: 10px;
+      padding: 12px 20px;
+      font-size: 1.3em;
+    }
+
+    /* 再挑戦ボタン */
     #retry {
       display: none;
-      margin-top: 20px;
-      padding: 10px 20px;
-      font-size: 1em;
-      background: #ffcccb;
+      margin-top: 25px;
+      padding: 12px 25px;
+      font-size: 1.1em;
+      background: #ff6666;
+      color: white;
       border: none;
-      border-radius: 8px;
-      cursor: pointer;
+      border-radius: 10px;
     }
   </style>
 </head>
 <body>
   <h1>～店長とジャンケン勝負～</h1>
-  <h2>先に3回勝った方が勝ち！</h2>
+  <p>先に3回勝った方が勝ち！</p>
 
+  <!-- 店長画像 -->
   <img id="boss" src="boss.png" alt="店長">
-  <img id="frame" src="frame.png" alt="枠">
-  <img id="bossHand" src="" alt="店長の手">
 
-  <div id="score">あなた 0 - 店長 0</div>
-  <div id="result"></div>
-  <div id="keyword"></div>
-
-  <div class="buttons">
-    <button onclick="play('rock')">✊</button>
-    <button onclick="play('scissors')">✌</button>
-    <button onclick="play('paper')">✋</button>
+  <!-- 店長の手（枠付き） -->
+  <div id="frame">
+    <img id="cpuHand" src="" alt="">
   </div>
 
+  <!-- スコアと結果表示 -->
+  <div id="score">あなた 0 - 店長 0</div>
+  <div id="result"></div>
+
+  <!-- プレイヤー選択 -->
+  <div id="choices">
+    <button onclick="play('rock')"><img src="rock.png" width="40"></button>
+    <button onclick="play('scissors')"><img src="scissors.png" width="40"></button>
+    <button onclick="play('paper')"><img src="paper.png" width="40"></button>
+  </div>
+
+  <!-- 再挑戦ボタン -->
   <button id="retry" onclick="resetGame()">再挑戦</button>
 
-<script>
-  let playerScore = 0;
-  let bossScore = 0;
+  <script>
+    let playerScore = 0;
+    let cpuScore = 0;
 
-  function bossChoice(player) {
-    if (Math.random() < 0.5) {
-      // ランダム
-      const hands = ['rock','scissors','paper'];
-      return hands[Math.floor(Math.random() * 3)];
-    } else {
-      // プレイヤーに勝つ手
-      if (player === 'rock') return 'paper';
-      if (player === 'scissors') return 'rock';
-      if (player === 'paper') return 'scissors';
+    const hands = {
+      rock: "rock.png",
+      scissors: "scissors.png",
+      paper: "paper.png"
+    };
+
+    function play(player) {
+      if (playerScore >= 3 || cpuScore >= 3) return; // ゲーム終了時は入力無効
+
+      const cpu = cpuChoice(player);
+      document.getElementById("cpuHand").src = hands[cpu];
+
+      let result = "";
+      if (player === cpu) {
+        result = "あいこ！";
+      } else if (
+        (player === "rock" && cpu === "scissors") ||
+        (player === "scissors" && cpu === "paper") ||
+        (player === "paper" && cpu === "rock")
+      ) {
+        playerScore++;
+        result = "あなたの勝ち！";
+        if (playerScore >= 3) {
+          result += " 🎉 ゲーム終了！あなたの勝利！<br>トークで『ボリューミー店長』って送ってね！";
+          document.getElementById("retry").style.display = "block";
+        }
+      } else {
+        cpuScore++;
+        result = "店長の勝ち！";
+        if (cpuScore >= 3) {
+          result += " 💥 ゲーム終了！店長の勝利！";
+          document.getElementById("retry").style.display = "block";
+        }
+      }
+
+      document.getElementById("score").textContent = `あなた ${playerScore} - 店長 ${cpuScore}`;
+      document.getElementById("result").innerHTML = result;
     }
-  }
 
-  function play(player) {
-    if (playerScore >= 3 || bossScore >= 3) return; // 終了後は操作不可
-
-    const boss = bossChoice(player);
-    document.getElementById('bossHand').src = boss + ".png";
-
-    let resultText = "";
-    if (player === boss) {
-      resultText = "あいこ！";
-    } else if (
-      (player === 'rock' && boss === 'scissors') ||
-      (player === 'scissors' && boss === 'paper') ||
-      (player === 'paper' && boss === 'rock')
-    ) {
-      playerScore++;
-      resultText = "あなたの勝ち！";
-    } else {
-      bossScore++;
-      resultText = "店長の勝ち！";
+    // 店長の手（50%勝率調整）
+    function cpuChoice(player) {
+      if (Math.random() < 0.5) {
+        if (player === "rock") return "scissors";
+        if (player === "scissors") return "paper";
+        if (player === "paper") return "rock";
+      }
+      return ["rock", "scissors", "paper"][Math.floor(Math.random() * 3)];
     }
 
-    document.getElementById('score').textContent = `あなた ${playerScore} - 店長 ${bossScore}`;
-    document.getElementById('result').textContent = resultText;
-
-    if (playerScore >= 3) {
-      document.getElementById('result').textContent = "🎉 あなたの勝利！";
-      document.getElementById('keyword').textContent = "トークで『ボリューミー店長』って送ってね！";
-    } else if (bossScore >= 3) {
-      document.getElementById('result').textContent = "店長の勝ち！ ゲーム終了！";
-      document.getElementById('retry').style.display = "block"; // 再挑戦ボタン表示
+    function resetGame() {
+      playerScore = 0;
+      cpuScore = 0;
+      document.getElementById("score").textContent = "あなた 0 - 店長 0";
+      document.getElementById("result").textContent = "";
+      document.getElementById("cpuHand").src = "";
+      document.getElementById("retry").style.display = "none";
     }
-  }
-
-  function resetGame() {
-    playerScore = 0;
-    bossScore = 0;
-    document.getElementById('score').textContent = "あなた 0 - 店長 0";
-    document.getElementById('result').textContent = "";
-    document.getElementById('keyword').textContent = "";
-    document.getElementById('bossHand').src = "";
-    document.getElementById('retry').style.display = "none";
-  }
-</script>
+  </script>
 </body>
 </html>
