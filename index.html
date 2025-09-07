@@ -4,20 +4,74 @@
   <meta charset="UTF-8">
   <title>店長とジャンケン勝負！</title>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 30px; }
-    button { font-size: 2em; margin: 10px; padding: 20px; }
-    #result, #score { margin-top: 20px; font-size: 1.2em; }
-    #keyword { font-size: 1.5em; color: red; margin-top: 20px; }
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 20px;
+      background: #87ceeb;
+    }
+    h1 { font-size: 2em; }
+    button {
+      font-size: 2em;
+      margin: 10px;
+      padding: 15px 30px;
+    }
+    #result, #score {
+      margin-top: 20px;
+      font-size: 1.2em;
+    }
+    #keyword {
+      font-size: 1.5em;
+      color: red;
+      margin-top: 20px;
+    }
+    /* 店長の体 */
+    .tencho {
+      width: 200px;
+      display: block;
+      margin: 0 auto;
+    }
+    /* 枠＋手エリア */
+    .cpu-area {
+      position: relative;
+      display: inline-block;
+      width: 200px;
+      height: 200px;
+      margin-top: 10px;
+    }
+    .waku {
+      width: 100%;
+    }
+    .hand {
+      position: absolute;
+      top: 30px;
+      left: 30px;
+      width: 140px;
+      display: none; /* 最初は非表示 */
+    }
   </style>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body>
   <h1>〜店長とジャンケン勝負〜</h1>
   <p>先に3回勝った方が勝ち！</p>
-  <button onclick="play('rock')">✊</button>
-  <button onclick="play('scissors')">✌️</button>
-  <button onclick="play('paper')">✋</button>
-  
+
+  <!-- 店長の体 -->
+  <img src="Jyanken - 1.png" alt="店長" class="tencho">
+
+  <!-- 枠と手 -->
+  <div class="cpu-area">
+    <img src="Jyanken - 5.png" alt="枠" class="waku">
+    <img id="cpu-hand" src="" alt="店長の手" class="hand">
+  </div>
+
+  <!-- プレイヤーの選択 -->
+  <div>
+    <button onclick="play('rock')">✊</button>
+    <button onclick="play('scissors')">✌️</button>
+    <button onclick="play('paper')">✋</button>
+  </div>
+
   <div id="score">あなた 0 - 店長 0</div>
   <div id="result"></div>
   <div id="keyword"></div>
@@ -27,7 +81,7 @@
     let cpuScore = 0;
 
     async function main() {
-      await liff.init({ liffId: "200086353-930m2Jk1" }); // ←ここをあなたのLIFF IDに
+      await liff.init({ liffId: "200086353-93Om2Jk1" }); // ← LIFF IDを置き換え
       if (!liff.isLoggedIn()) liff.login();
     }
     main();
@@ -47,6 +101,13 @@
 
       const cpu = cpuChoice(playerChoice);
       let result = "";
+
+      // 店長の手を切り替え
+      let cpuHandImg = document.getElementById("cpu-hand");
+      if (cpu === 'rock') cpuHandImg.src = "Jyanken - 2.png";
+      if (cpu === 'scissors') cpuHandImg.src = "Jyanken - 3.png";
+      if (cpu === 'paper') cpuHandImg.src = "Jyanken - 4.png";
+      cpuHandImg.style.display = "block";
 
       if (playerChoice === cpu) {
         result = "引き分け！";
@@ -74,10 +135,10 @@
       }
     }
 
-    function toEmoji(choice) {
-      if (choice === 'rock') return '✊';
-      if (choice === 'scissors') return '✌️';
-      if (choice === 'paper') return '✋';
+    function toEmoji(hand) {
+      if (hand==='rock') return '✊';
+      if (hand==='scissors') return '✌️';
+      if (hand==='paper') return '✋';
     }
   </script>
 </body>
