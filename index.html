@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>店長とジャンケン勝負！</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 30px; }
+    button { font-size: 2em; margin: 10px; padding: 20px; }
+    #result, #score { margin-top: 20px; font-size: 1.2em; }
+    #keyword { font-size: 1.5em; color: red; margin-top: 20px; }
+  </style>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+  <h1>〜店長とジャンケン勝負〜</h1>
+  <p>先に3回勝った方が勝ち！</p>
+  <button onclick="play('rock')">✊</button>
+  <button onclick="play('scissors')">✌️</button>
+  <button onclick="play('paper')">✋</button>
+  
+  <div id="score">あなた 0 - 店長 0</div>
+  <div id="result"></div>
+  <div id="keyword"></div>
+
+  <script>
+    let playerScore = 0;
+    let cpuScore = 0;
+
+    async function main() {
+      await liff.init({ liffId: "200086353-930m2Jk1" }); // ←ここをあなたのLIFF IDに
+      if (!liff.isLoggedIn()) liff.login();
+    }
+    main();
+
+    function cpuChoice(player) {
+      if (Math.random() < 0.5) {
+        const hands = ['rock','scissors','paper'];
+        return hands[Math.floor(Math.random()*3)];
+      }
+      if (player === 'rock') return 'paper';
+      if (player === 'scissors') return 'rock';
+      if (player === 'paper') return 'scissors';
+    }
+
+    function play(playerChoice) {
+      if (playerScore >= 3 || cpuScore >= 3) return;
+
+      const cpu = cpuChoice(playerChoice);
+      let result = "";
+
+      if (playerChoice === cpu) {
+        result = "引き分け！";
+      } else if (
+        (playerChoice==='rock' && cpu==='scissors') ||
+        (playerChoice==='scissors' && cpu==='paper') ||
+        (playerChoice==='paper' && cpu==='rock')
+      ) {
+        result = "あなたの勝ち！";
+        playerScore++;
+      } else {
+        result = "店長の勝ち！";
+        cpuScore++;
+      }
+
+      document.getElementById("result").innerText =
+        `あなた:${toEmoji(playerChoice)} 店長:${toEmoji(cpu)} → ${result}`;
+      document.getElementById("score").innerText =
+        `あなた ${playerScore} - 店長 ${cpuScore}`;
+
+      if (playerScore === 3) {
+        document.getElementById("keyword").innerText = "合言葉：CHIRINWIN";
+      } else if (cpuScore === 3) {
+        document.getElementById("keyword").innerText = "また挑戦してね！";
+      }
+    }
+
+    function toEmoji(choice) {
+      if (choice === 'rock') return '✊';
+      if (choice === 'scissors') return '✌️';
+      if (choice === 'paper') return '✋';
+    }
+  </script>
+</body>
+</html>
