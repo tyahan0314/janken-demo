@@ -10,30 +10,15 @@
       padding: 10px;
       background: #87ceeb;
     }
-
-    /* 上の配置（左: 枠＋店長の手、右: 店長） */
     .top-area {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       margin-bottom: 20px;
     }
-
-    /* 店長 */
-    .tencho {
-      width: 100px;
-      max-width: 30%;
-    }
-
-    /* 枠＋手 */
-    .cpu-area {
-      position: relative;
-      width: 120px;
-      max-width: 40%;
-    }
-    .waku {
-      width: 100%;
-    }
+    .tencho { width: 100px; }
+    .cpu-area { position: relative; width: 120px; }
+    .waku { width: 100%; }
     .cpu-hand {
       position: absolute;
       top: 15%;
@@ -41,51 +26,28 @@
       width: 70%;
       display: none;
     }
-
-    /* プレイヤーの手 */
-    .player-hand {
-      margin-top: 10px;
-      font-size: 2em;
-    }
-
-    /* 勝敗結果 */
-    #result {
-      font-size: 1.3em;
-      margin: 15px 0;
-      font-weight: bold;
-    }
-
-    /* ボタン */
-    .btn-area {
-      margin-top: 15px;
-    }
-    button {
-      font-size: 1.8em;
-      margin: 8px;
-      padding: 10px 15px;
-    }
+    .player-hand { margin-top: 10px; font-size: 2em; }
+    #result { font-size: 1.3em; margin: 15px 0; font-weight: bold; }
+    .btn-area { margin-top: 15px; }
+    button { font-size: 1.8em; margin: 8px; padding: 10px 15px; }
   </style>
 </head>
 <body>
   <h1>〜店長とジャンケン勝負〜</h1>
   <p>先に3回勝った方が勝ち！</p>
 
-  <!-- 上部配置 -->
   <div class="top-area">
     <div class="cpu-area">
       <img src="Jyanken-5.png" class="waku">
       <img src="Jyanken-2.png" id="cpuHand" class="cpu-hand">
     </div>
-    <img src="Jyanken-1.png" class="tencho">
+    <img src="Jyanken-1.png" class="tencho"> <!-- ←ここはファイル名修正 -->
   </div>
 
-  <!-- プレイヤーの手 -->
   <div class="player-hand" id="playerHand">✊</div>
-
-  <!-- 勝敗結果 -->
+  <div id="score">あなた 0 - 店長 0</div>
   <div id="result">ここに勝敗が出ます</div>
 
-  <!-- ボタン -->
   <div class="btn-area">
     <button onclick="play('rock')">✊</button>
     <button onclick="play('scissors')">✌️</button>
@@ -99,7 +61,13 @@
       paper: "Jyanken-4.png"
     };
 
+    let playerScore = 0;
+    let cpuScore = 0;
+    let gameOver = false;
+
     function play(player) {
+      if (gameOver) return; // 終了後は動かない
+
       document.getElementById("playerHand").textContent =
         player === "rock" ? "✊" :
         player === "scissors" ? "✌️" : "✋";
@@ -120,10 +88,20 @@
         (player === "paper" && cpu === "rock")
       ) {
         resultText = "あなたの勝ち！";
+        playerScore++;
       } else {
         resultText = "店長の勝ち！";
+        cpuScore++;
       }
+
+      document.getElementById("score").textContent = `あなた ${playerScore} - 店長 ${cpuScore}`;
       document.getElementById("result").textContent = resultText;
+
+      if (playerScore === 3 || cpuScore === 3) {
+        gameOver = true;
+        document.getElementById("result").textContent += 
+          playerScore === 3 ? " 🎉ゲーム終了！あなたの勝利！" : " 💀ゲーム終了！店長の勝利！";
+      }
     }
   </script>
 </body>
