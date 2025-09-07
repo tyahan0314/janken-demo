@@ -2,122 +2,169 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>〜店長とジャンケン勝負〜</title>
+  <title>～店長とジャンケン勝負～</title>
   <style>
     body {
       font-family: sans-serif;
-      text-align: center;
-      background: #87CEEB; /* 水色背景 */
+      background-color: #87CEEB;
       margin: 0;
       padding: 0;
+      text-align: center;
     }
     h1 {
       margin-top: 20px;
+      font-size: 1.6em;
     }
+    h2 {
+      font-size: 1em;
+      margin: 5px 0 20px;
+    }
+
+    /* 店長画像（右上固定） */
     #boss {
       position: absolute;
-      top: 20px;
-      right: 20px;
-      width: 120px;
+      top: 10px;
+      right: 10px;
+      width: 80px;
     }
-    #frameArea {
-      position: absolute;
-      top: 100px;
-      left: 20px;
-      width: 150px;
-      height: 150px;
-    }
+
+    /* 枠と手（左上） */
     #frame {
-      width: 100%;
+      position: absolute;
+      top: 80px;
+      left: 10px;
+      width: 120px;
     }
     #bossHand {
       position: absolute;
-      top: 30px;
-      left: 40px;
-      width: 80px;
+      top: 105px;
+      left: 35px;
+      width: 70px;
     }
-    #result {
-      margin-top: 300px;
-      font-size: 1.5em;
+
+    /* スコア・メッセージ */
+    #score {
+      margin-top: 220px;
+      font-size: 1.2em;
       font-weight: bold;
     }
-    #score {
+    #result {
+      margin-top: 10px;
+      font-size: 1.1em;
+    }
+    #keyword {
       margin-top: 10px;
       font-size: 1.2em;
+      color: red;
+      font-weight: bold;
     }
-    #buttons {
-      margin-top: 20px;
+
+    /* ボタン */
+    .buttons {
+      margin-top: 40px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
     }
-    #buttons button {
-      margin: 0 10px;
-      padding: 10px;
-      background: white;
+    button {
+      font-size: 2em;
+      padding: 10px 20px;
       border-radius: 10px;
-      border: 2px solid #ccc;
+      border: none;
+      background: white;
+      cursor: pointer;
     }
-    #buttons img {
-      width: 60px;
+    #retry {
+      display: none;
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1em;
+      background: #ffcccb;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <h1>〜店長とジャンケン勝負〜</h1>
-  <p>先に3回勝った方が勝ち！</p>
+  <h1>～店長とジャンケン勝負～</h1>
+  <h2>先に3回勝った方が勝ち！</h2>
 
-  <!-- 店長 -->
-  <img src="./boss.png" id="boss">
+  <img id="boss" src="boss.png" alt="店長">
+  <img id="frame" src="frame.png" alt="枠">
+  <img id="bossHand" src="" alt="店長の手">
 
-  <!-- 枠と店長の手 -->
-  <div id="frameArea">
-    <img src="./frame.png" id="frame">
-    <img src="./rock.png" id="bossHand">
-  </div>
-
-  <!-- 勝敗表示 -->
-  <div id="result">勝負を選んでね！</div>
   <div id="score">あなた 0 - 店長 0</div>
+  <div id="result"></div>
+  <div id="keyword"></div>
 
-  <!-- プレイヤーの手 -->
-  <div id="buttons">
-    <button onclick="play('rock')"><img src="./rock.png"></button>
-    <button onclick="play('scissors')"><img src="./scissors.png"></button>
-    <button onclick="play('paper')"><img src="./paper.png"></button>
+  <div class="buttons">
+    <button onclick="play('rock')">✊</button>
+    <button onclick="play('scissors')">✌</button>
+    <button onclick="play('paper')">✋</button>
   </div>
 
-  <script>
-    let playerScore = 0;
-    let bossScore = 0;
+  <button id="retry" onclick="resetGame()">再挑戦</button>
 
-    function play(playerChoice) {
-      if (playerScore >= 3 || bossScore >= 3) return;
+<script>
+  let playerScore = 0;
+  let bossScore = 0;
 
-      const choices = ['rock','scissors','paper'];
-      const bossChoice = choices[Math.floor(Math.random() * 3)];
-
-      document.getElementById("bossHand").src = `./${bossChoice}.png`;
-
-      if (playerChoice === bossChoice) {
-        document.getElementById("result").textContent = "あいこ！";
-      } else if (
-        (playerChoice === 'rock' && bossChoice === 'scissors') ||
-        (playerChoice === 'scissors' && bossChoice === 'paper') ||
-        (playerChoice === 'paper' && bossChoice === 'rock')
-      ) {
-        playerScore++;
-        document.getElementById("result").textContent = "あなたの勝ち！";
-      } else {
-        bossScore++;
-        document.getElementById("result").textContent = "店長の勝ち！";
-      }
-
-      document.getElementById("score").textContent = `あなた ${playerScore} - 店長 ${bossScore}`;
-
-      if (playerScore === 3) {
-        document.getElementById("result").textContent = "🎉 あなたの勝利！";
-      } else if (bossScore === 3) {
-        document.getElementById("result").textContent = "店長の勝利！";
-      }
+  function bossChoice(player) {
+    if (Math.random() < 0.5) {
+      // ランダム
+      const hands = ['rock','scissors','paper'];
+      return hands[Math.floor(Math.random() * 3)];
+    } else {
+      // プレイヤーに勝つ手
+      if (player === 'rock') return 'paper';
+      if (player === 'scissors') return 'rock';
+      if (player === 'paper') return 'scissors';
     }
-  </script>
+  }
+
+  function play(player) {
+    if (playerScore >= 3 || bossScore >= 3) return; // 終了後は操作不可
+
+    const boss = bossChoice(player);
+    document.getElementById('bossHand').src = boss + ".png";
+
+    let resultText = "";
+    if (player === boss) {
+      resultText = "あいこ！";
+    } else if (
+      (player === 'rock' && boss === 'scissors') ||
+      (player === 'scissors' && boss === 'paper') ||
+      (player === 'paper' && boss === 'rock')
+    ) {
+      playerScore++;
+      resultText = "あなたの勝ち！";
+    } else {
+      bossScore++;
+      resultText = "店長の勝ち！";
+    }
+
+    document.getElementById('score').textContent = `あなた ${playerScore} - 店長 ${bossScore}`;
+    document.getElementById('result').textContent = resultText;
+
+    if (playerScore >= 3) {
+      document.getElementById('result').textContent = "🎉 あなたの勝利！";
+      document.getElementById('keyword').textContent = "トークで『ボリューミー店長』って送ってね！";
+    } else if (bossScore >= 3) {
+      document.getElementById('result').textContent = "店長の勝ち！ ゲーム終了！";
+      document.getElementById('retry').style.display = "block"; // 再挑戦ボタン表示
+    }
+  }
+
+  function resetGame() {
+    playerScore = 0;
+    bossScore = 0;
+    document.getElementById('score').textContent = "あなた 0 - 店長 0";
+    document.getElementById('result').textContent = "";
+    document.getElementById('keyword').textContent = "";
+    document.getElementById('bossHand').src = "";
+    document.getElementById('retry').style.display = "none";
+  }
+</script>
 </body>
 </html>
