@@ -163,7 +163,7 @@
 
   // ===== ジャンケン本体 =====
   const WIN_TARGET = 3;
-  const BOSS_EDGE  = 0.64; // 店長ちょい強め
+  const BOSS_EDGE  = 0.62; // 店長ちょい強め
 
   const scoreEl    = document.getElementById('score');
   const messageEl  = document.getElementById('message');
@@ -220,7 +220,7 @@
       if (score.you >= WIN_TARGET){
         resultCard.innerHTML = `
           <strong>🎉 あなたの勝ち！</strong>
-          <div style="margin-top:6px">この画面をスタッフに見せてプレゼント貰ってね！</div>`;
+          <div style="margin-top:6px">この画面をスタッフに見せて、つかみ取りチャレンジ！</div>`;
       }else{
         resultCard.innerHTML = `<strong>👑 店長の勝ち！</strong><div style="margin-top:6px">また挑戦してね！</div>`;
       }
