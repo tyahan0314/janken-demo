@@ -42,11 +42,7 @@
   .speech{display:none;margin:2px auto 0;padding:.6em 1em;border-radius:12px;
     background:#fff; box-shadow:0 8px 24px rgba(0,0,0,.12); font-weight:800; text-align:center}
 
-  /* ===== モード選択 ===== */
-  #mode{display:none}
-  .modeBtns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:14px}
-
-  /* ===== ジャンケン（前と同じUI） ===== */
+  /* ===== ジャンケン ===== */
   #game{display:none}
   .topRow{
     margin-top:4px;display:flex;align-items:flex-start;justify-content:space-between;gap:clamp(10px,4vw,18px)
@@ -90,21 +86,20 @@
   .memCard{ aspect-ratio: 1 / 1; perspective: 1000px; position:relative; }
   .memInner{
     position:absolute; inset:0; transition: transform .42s ease;
-    transform-style: preserve-3d; transform: rotateY(180deg); /* 初期は裏面 */
+    transform-style: preserve-3d;
+    transform: rotateY(180deg);              /* 初期は裏面を見せる */
   }
-  .memInner.flipped{ transform: rotateY(0deg); }           /* めくる */
+  .memInner.flipped{ transform: rotateY(0deg); } /* めくると表面 */
   .memFace{
     position:absolute; inset:0; border-radius:16px; overflow:hidden;
     backface-visibility:hidden; box-shadow:0 10px 24px rgba(0,0,0,.12);
     display:grid; place-items:center;
   }
+  .memFace.front{ background:#fff; transform: rotateY(0deg); }       /* 表：絵柄 */
   .memFace.back{
     background: linear-gradient(135deg, #c9f0ff, #97d2e4);
     color:#084357; font-size: clamp(22px, 6.4vw, 28px);
-  }
-  .memFace.front{
-    transform: rotateY(180deg);
-    background:#fff;
+    transform: rotateY(180deg);                                       /* 裏：ロゴ */
   }
   .memFace.front img{ width: 78%; height: 78%; object-fit: contain; pointer-events:none; }
   .memInner.matched{ animation: pop .36s ease; }
@@ -116,7 +111,7 @@
     <!-- ===== タイトル ===== -->
     <div class="container" id="title">
       <div class="hero">
-        <span class="pill" id="titlePill">めちゃつよっ！</span> <!-- ← 常に表示 -->
+        <span class="pill" id="titlePill">めちゃつよっ！</span>
         <h2>ボリューミー店長との<br>じゃんけん対決！</h2>
         <img id="titleImg" class="title-illus" src="title-start2.png" alt="店長ポーズ">
         <div id="speech" class="speech">俺の強さに怖気づいたかっ！</div>
@@ -124,20 +119,15 @@
           <button class="btn primary" id="btnStart">挑戦する</button>
           <button class="btn ghost"   id="btnQuit"  data-mode="quit">あきらめる</button>
         </div>
+        <!-- 追加：神経衰弱で遊ぶ -->
+        <div class="btnrow">
+          <button class="btn ghost" id="btnMem">神経衰弱で遊ぶ</button>
+        </div>
         <p class="title-note">めちゃつよ店長に勝利しよう！</p>
       </div>
     </div>
 
-    <!-- ===== モード選択 ===== -->
-    <div class="container" id="mode">
-      <h1>ゲームを選ぶ</h1>
-      <div class="modeBtns">
-        <button class="btn primary" id="modeJanken">ジャンケン</button>
-        <button class="btn ghost"   id="modeMemory">神経衰弱</button>
-      </div>
-    </div>
-
-    <!-- ===== ジャンケン（そのまま） ===== -->
+    <!-- ===== ジャンケン ===== -->
     <div class="container" id="game">
       <div class="topRow">
         <div class="frameBox">
@@ -164,7 +154,7 @@
       </div>
 
       <div class="btnrow" style="margin-top:12px">
-        <button class="btn ghost" id="backToMode1">ゲーム選択へ</button>
+        <button class="btn ghost" id="backToTitle1">タイトルへ戻る</button>
       </div>
     </div>
 
@@ -184,15 +174,14 @@
       <div class="resultCard" id="memResult" style="display:none; margin-top:14px"></div>
 
       <div class="btnrow" style="margin-top:10px">
-        <button class="btn ghost" id="memBack">ゲーム選択へ</button>
+        <button class="btn ghost" id="memBack">タイトルへ戻る</button>
       </div>
     </div>
   </div>
 
 <script>
-  // ===== タイトル：あきらめる → セリフ表示 & ボタンを挑戦に変換（1回だけ） =====
+  // ===== タイトル：あきらめる → セリフ表示 & 1回だけ「挑戦する」に変化 =====
   const titleView = document.getElementById('title');
-  const modeView  = document.getElementById('mode');
   const gameView  = document.getElementById('game');
   const memView   = document.getElementById('memory');
 
@@ -200,6 +189,7 @@
   const speech    = document.getElementById('speech');
   const btnStart  = document.getElementById('btnStart');
   const btnQuit   = document.getElementById('btnQuit');
+  const btnMem    = document.getElementById('btnMem');
 
   btnQuit.addEventListener('click', () => {
     if (btnQuit.dataset.mode === 'quit') {
@@ -210,31 +200,36 @@
       btnQuit.classList.remove('ghost');
       btnQuit.classList.add('primary');
     } else {
-      showMode();
+      startGame();
     }
   });
-  btnStart.addEventListener('click', showMode);
+  btnStart.addEventListener('click', startGame);
+  btnMem.addEventListener('click', startMemory);
 
-  function showMode(){
-    titleView.style.display='none';
+  function showTitle(){
+    // タイトルへ戻す＋タイトルUIを初期状態に
     gameView.style.display='none';
     memView.style.display='none';
-    modeView.style.display='block';
+    titleView.style.display='block';
+    speech.style.display='none';
+    titleImg.src = 'title-start2.png';
+    btnQuit.textContent = 'あきらめる';
+    btnQuit.dataset.mode = 'quit';
+    btnQuit.classList.add('ghost');
+    btnQuit.classList.remove('primary');
     window.scrollTo({top:0, behavior:'smooth'});
   }
 
-  // ===== モード → 各ゲーム =====
-  document.getElementById('modeJanken').addEventListener('click', ()=>{
-    modeView.style.display='none'; gameView.style.display='block'; resetGame();
-  });
-  document.getElementById('modeMemory').addEventListener('click', ()=>{
-    modeView.style.display='none'; startMemory();
-  });
-  document.getElementById('backToMode1').addEventListener('click', showMode);
+  function startGame(){
+    titleView.style.display = 'none';
+    gameView.style.display  = 'block';
+    resetGame();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
 
-  // ===== ジャンケン（前回のまま） =====
+  // ===== ジャンケン =====
   const WIN_TARGET = 3;
-  const BOSS_EDGE  = 0.70; // ← 「店長弱い？」なら 0.70 くらいに上げてOK
+  const BOSS_EDGE  = 0.70; // 店長ちょい強め
 
   const scoreEl    = document.getElementById('score');
   const messageEl  = document.getElementById('message');
@@ -300,8 +295,9 @@
 
   document.querySelectorAll('.handBtn').forEach(b=>b.addEventListener('click', ()=>play(b.dataset.hand)));
   document.getElementById('restartBtn').addEventListener('click', resetGame);
+  document.getElementById('backToTitle1').addEventListener('click', showTitle);
 
-  // ===== 神経衰弱（正方形 4柄×2） =====
+  // ===== 神経衰弱（4柄×2） =====
   const USE_ICE_IMAGES = true; // 画像を使う（ice1〜ice4）
   const ICE_SET = [
     { img:'ice1.png', emoji:'🍨', name:'プレーン' },
@@ -322,6 +318,7 @@
   let pairs = 0, moves = 0;
 
   function startMemory(){
+    titleView.style.display='none';
     gameView.style.display='none';
     memView.style.display='block';
     buildMemDeck();
@@ -386,7 +383,7 @@
     if (lock) return;
     if (innerEl.classList.contains('flipped')) return;
 
-    innerEl.classList.add('flipped');
+    innerEl.classList.add('flipped'); // ← 裏(初期) → 表
     if (!first){
       first = { idx, id: memDeck[idx].id, el: innerEl };
       navigator.vibrate?.(15);
@@ -397,7 +394,6 @@
     lock = true; moves++; updateMemHud();
 
     if (first.id === second.id){
-      // ヒット
       setTimeout(()=>{
         first.el.classList.add('matched');
         second.el.classList.add('matched');
@@ -413,7 +409,6 @@
         navigator.vibrate?.([20,40,20]);
       }, 220);
     }else{
-      // ミス：少し見せてから戻す
       setTimeout(()=>{
         first.el.classList.remove('flipped');
         second.el.classList.remove('flipped');
@@ -424,7 +419,7 @@
   }
 
   memRetry.addEventListener('click', startMemory);
-  memBack.addEventListener('click', showMode);
+  memBack.addEventListener('click', showTitle);
 </script>
 </body>
 </html>
