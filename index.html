@@ -1,281 +1,276 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>ボリューミー店長ジャンケン</title>
-<style>
-  :root{
-    --bg:#97d2e3;
-    --ink:#0c2233;
-    --ink-weak:#2b4a5a;
-    --card:#fff;
-    --accent:#0ea5e9;
-    --accent-ink:#fff;
-    --btn-shadow: 0 8px 24px rgba(0,0,0,.12);
-    --radius:16px;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0;background:var(--bg);color:var(--ink);
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans JP, Hiragino Kaku Gothic ProN, Meiryo, sans-serif;
-    -webkit-font-smoothing:antialiased
-  }
-  .container{max-width:960px;margin-inline:auto;padding:min(3svh,24px) clamp(16px,6vw,28px)}
-  h1{
-    margin:0 0 8px;font-size:clamp(22px,6.2vw,40px);line-height:1.2;font-weight:900;letter-spacing:.02em;
-    text-align:center
-  }
-  p.lead{margin:0 0 20px;text-align:center;color:var(--ink-weak);font-size:clamp(13px,3.6vw,16px)}
-  .chip{
-    display:inline-block;margin:0 auto 10px;padding:10px 20px;border-radius:999px;
-    background:#e6f7fe;color:#134a63;font-weight:700;font-size:clamp(12px,3.8vw,16px)
-  }
-  button{font:inherit}
-  .btn{
-    display:inline-flex;align-items:center;justify-content:center;gap:.5em;
-    min-width: min(48svw, 280px); padding:14px 20px;border-radius:999px;border:2px solid transparent;
-    box-shadow:var(--btn-shadow);cursor:pointer;user-select:none;touch-action:manipulation
-  }
-  .btn.primary{background:var(--accent);color:var(--accent-ink)}
-  .btn.outline{background:transparent;border-color:#0f3c4b;color:#0f3c4b}
-  .btn:active{transform:translateY(1px)}
-  .btn-row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:22px}
-  .caption{margin-top:14px;text-align:center;color:var(--ink-weak);font-size:clamp(12px,3.6vw,15px)}
-  .hero{
-    display:flex;justify-content:center;margin:clamp(8px,2svh,16px) 0 clamp(6px,1.5svh,12px);
-  }
-  /* 透過PNGの余白に引っ張られないよう大きめに */
-  .hero img{
-    max-height:min(52svh,76vw);
-    max-width:min(82vw,560px);
-    height:auto;width:auto;object-fit:contain;object-position:center bottom;
-  }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>ボリューミー店長ジャンケン</title>
+  <style>
+    :root{
+      --bg:#97d2e4;
+      --ink:#0c2a33;
+      --muted:#215b6b;
+      --white:#fff;
+      --pill:#e6f7fd;
+      --btn:#10aee3;
+      --btn-ink:#fff;
+      --btn-ghost:#ffffff33;
+      --card:#ffffffef;
+      --win:#0da66e;
+      --lose:#d94848;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;background:var(--bg);color:var(--ink);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    }
+    .wrap{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
+    .container{width:min(880px,92vw);margin:0 auto;padding:16px 0 24px}
 
-  /* 画面切替 */
-  .screen{display:none}
-  .screen.active{display:block}
+    /* 共通UI */
+    h1{margin:8px 0 4px;font-size:clamp(22px,5.8vw,36px);letter-spacing:.06em;text-align:center}
+    .sub{margin:0 0 10px;color:var(--muted);text-align:center;font-size:clamp(12px,3.4vw,15px)}
+    .score{margin:12px 0 6px;text-align:center;font-weight:800;font-size:clamp(22px,7.2vw,34px)}
+    .message{margin:8px 0 18px;text-align:center;font-size:clamp(14px,4.2vw,18px)}
+    .pill{
+      display:inline-block;padding:.45em 1em;border-radius:999px;background:var(--pill);
+      font-weight:700;color:#222;font-size:clamp(12px,3.8vw,16px)
+    }
+    .btnrow{display:flex;gap:14px;justify-content:center;align-items:center;margin:10px 0 0}
+    .btn{
+      appearance:none;border:none;border-radius:14px;cursor:pointer;
+      font-weight:800;letter-spacing:.06em;
+      transition:transform .05s ease, box-shadow .05s ease, background .2s ease;
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{
+      background:var(--btn);color:var(--btn-ink);
+      padding:14px 22px; box-shadow:0 8px 24px #0592c266;
+      font-size:clamp(14px,4.8vw,18px)
+    }
+    .btn.ghost{
+      background:transparent;color:#083b48;border:2px solid #083b4840;
+      padding:12px 20px;border-radius:16px;font-size:clamp(14px,4.8vw,18px)
+    }
 
-  /* ===== Game ===== */
-  .topline{
-    display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
-    margin-bottom:clamp(8px,1.8svh,16px)
-  }
-  /* 左：枠＋店長の手（絵文字） */
-  .frameWrap{
-    display:grid;place-items:center;
-    width:min(44vw,260px);aspect-ratio:6/8;position:relative;
-  }
-  .frameWrap img.frame{
-    position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none
-  }
-  .frameWrap .handEmoji{
-    font-size:clamp(44px,10vw,84px);filter:drop-shadow(0 6px 16px rgba(0,0,0,.15))
-  }
-  /* 右：店長 */
-  #boss{
-    max-width:min(40vw,260px);
-    max-height:min(32svh,280px);
-    height:auto;width:auto;object-fit:contain;object-position:center;filter:drop-shadow(0 8px 24px rgba(0,0,0,.12))
-  }
+    /* タイトル画面 */
+    #title{display:grid;place-items:center}
+    #title .hero{width:100%;display:flex;flex-direction:column;align-items:center;gap:18px;margin-top:8px}
+    #title h2{margin:0;text-align:center;line-height:1.25;
+      font-size:clamp(22px,6.2vw,34px);
+    }
+    .title-illus{
+      width:min(540px,86vw);max-height:56vh;object-fit:contain;object-position:center bottom;display:block;
+      margin:8px auto 8px;
+    }
+    .title-note{margin:14px 0 0;text-align:center;color:#083b48aa;font-size:clamp(12px,3.6vw,15px)}
+    .double{gap:18px;margin:8px 0 0}
 
-  .score{
-    text-align:center;margin:10px 0 6px;
-    font-size:clamp(20px,6vw,34px);font-weight:900;letter-spacing:.02em
-  }
-  .hint{ text-align:center;color:var(--ink-weak);font-size:clamp(13px,3.8vw,16px);margin-bottom:12px}
+    /* ゲーム画面 */
+    #game{display:none}
+    .topRow{
+      margin-top:4px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+    }
+    .frameBox{
+      position:relative;flex:0 0 auto;
+      width:clamp(92px,24vw,150px);aspect-ratio:3/4;
+      background:url("frame2.png") center/contain no-repeat;
+    }
+    .bossHand{
+      position:absolute;inset:12% 12% auto 12%;
+      display:grid;place-items:center;height:76%; 
+      font-size:clamp(40px,12vw,68px);
+      filter: drop-shadow(0 8px 14px #00000018);
+    }
+    .bossPic{flex:0 0 auto;width:clamp(140px,28vw,210px);height:auto;object-fit:contain}
+    .hands{
+      margin:14px auto 0;display:flex;justify-content:center;gap:16px;flex-wrap:nowrap;
+    }
+    .handBtn{
+      width:clamp(84px,22vw,128px);aspect-ratio:1/1;border-radius:18px;background:var(--white);
+      box-shadow:0 10px 30px #075a6a22;display:grid;place-items:center;
+      font-size:clamp(30px,10vw,48px);cursor:pointer;border:none;
+      transition:transform .07s ease, box-shadow .07s ease, background .2s ease;
+    }
+    .handBtn:active{transform:translateY(1px);box-shadow:0 6px 18px #075a6a30}
+    .resultCard{
+      display:none;margin:12px auto 0;max-width:720px;
+      background:var(--card);border-radius:16px;padding:12px 14px;text-align:center;
+      font-size:clamp(14px,4.4vw,18px);box-shadow:0 12px 28px #07495926;
+    }
+    .restartRow{display:none;justify-content:center;margin:14px 0 0}
+    .win{color:var(--win);font-weight:800}
+    .lose{color:var(--lose);font-weight:800}
 
-  /* 手ボタン（絵文字） */
-  .hands{ display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin:18px 0 8px}
-  .hand{
-    width:min(28vw,160px);aspect-ratio:1/1;border-radius:20px;border:none;background:var(--card);
-    box-shadow:var(--btn-shadow);cursor:pointer
-  }
-  .hand span{font-size:clamp(36px,10vw,56px)}
-  .hand:active{transform:translateY(1px)}
-
-  /* 終了後のカード & 再挑戦 */
-  .resultCard{
-    display:none;max-width:720px;margin:14px auto 0;background:var(--card);border-radius:16px;
-    padding:14px 16px;box-shadow:var(--btn-shadow);text-align:center
-  }
-  .resultCard strong{font-size:clamp(14px,4.2vw,18px)}
-  .utils{ display:flex;justify-content:center;gap:12px;margin-top:12px;flex-wrap:wrap}
-  .pill{padding:8px 14px;border-radius:999px;border:1px solid #c8d8df;background:#f3fbff;color:#0f3c4b}
-
-  .restartRow{display:none;justify-content:center;margin:18px 0 24px}
-  .restart{padding:14px 28px;border-radius:999px;border:2px solid #083645;background:transparent;color:#083645}
-
-  @media (max-width:390px){
-    .hero img{max-height:48svh}
-    #boss{max-width:46vw}
-    .frameWrap{width:min(48vw,240px)}
-  }
-</style>
+    /* レイアウトの詰め */
+    .container.narrow{padding-bottom:16px}
+    footer{height:18px}
+  </style>
 </head>
 <body>
-
-<!-- ===== Title screen ===== -->
-<section id="title" class="screen active">
-  <div class="container">
-    <div class="chip" id="titleChip">めちゃつよっ！</div>
-    <h1>ボリューミー店長との<br>じゃんけん対決！</h1>
-    <div class="hero"><img id="titleImg" src="./title-start2.png" alt="店長（パーで挑発）"></div>
-    <div class="btn-row" id="titleBtns">
-      <button class="btn primary" id="start1">挑戦する</button>
-      <button class="btn outline" id="start2">あきらめる</button>
-    </div>
-    <p class="caption">勝利すると特典がもらえるよ！</p>
-  </div>
-</section>
-
-<!-- ===== Game screen ===== -->
-<section id="game" class="screen">
-  <div class="container">
-    <h1>〜店長とジャンケン勝負〜</h1>
-    <p class="lead">先に3回勝った方が勝ち！</p>
-
-    <div class="topline">
-      <div class="frameWrap">
-        <img src="./frame2.png" class="frame" alt="">
-        <div id="bossHand" class="handEmoji">✊</div>
+  <div class="wrap">
+    <div class="container" id="title">
+      <div class="hero">
+        <span class="pill" id="titlePill">めちゃつよっ！</span>
+        <h2>ボリューミー店長との<br>じゃんけん対決！</h2>
+        <img id="titleImg" class="title-illus" src="title-start2.png" alt="店長ポーズ">
+        <div class="btnrow double">
+          <button class="btn primary" id="start1">挑戦する</button>
+          <button class="btn ghost"   id="start2">挑戦する</button>
+        </div>
+        <p class="title-note">スタッフに勝利画面を見せると特典がもらえるよ！</p>
       </div>
-      <img id="boss" src="./boss2.png" alt="店長">
     </div>
 
-    <div id="score" class="score">あなた 0 - 店長 0</div>
-    <div id="hint" class="hint">勝負を選んでね！</div>
+    <div class="container narrow" id="game">
+      <div class="topRow">
+        <div class="frameBox">
+          <div class="bossHand" id="bossHand">✊</div>
+        </div>
+        <img class="bossPic" src="boss2.png" alt="店長">
+      </div>
 
-    <div id="hands" class="hands" role="group" aria-label="じゃんけんを選ぶ">
-      <button class="hand" data-hand="rock"     aria-label="グー"><span>✊</span></button>
-      <button class="hand" data-hand="scissors" aria-label="チョキ"><span>✌️</span></button>
-      <button class="hand" data-hand="paper"    aria-label="パー"><span>🖐️</span></button>
+      <h1>～店長とジャンケン勝負～</h1>
+      <p class="sub">先に3回勝った方が勝ち！</p>
+
+      <div class="score" id="score">あなた 0 - 店長 0</div>
+      <div class="message" id="message">手を選んでね！</div>
+
+      <div class="hands" id="hands">
+        <button class="handBtn" data-hand="rock"     aria-label="グー">✊</button>
+        <button class="handBtn" data-hand="scissors" aria-label="チョキ">✌️</button>
+        <button class="handBtn" data-hand="paper"    aria-label="パー">✋</button>
+      </div>
+
+      <div class="resultCard" id="resultCard"></div>
+      <div class="restartRow" id="restartRow">
+        <button class="btn ghost" id="restartBtn">再挑戦</button>
+      </div>
     </div>
 
-    <!-- 勝利時の合言葉カード / 失敗時のメッセージ -->
-    <div id="resultCard" class="resultCard" aria-live="polite"></div>
-
-    <div id="restartRow" class="restartRow">
-      <button class="restart" id="restartBtn">再挑戦</button>
-    </div>
+    <footer></footer>
   </div>
-</section>
 
-<script>
-  // 画面切替
-  const $ = s=>document.querySelector(s);
-  const show = id => {
-    document.querySelectorAll('.screen').forEach(v=>v.classList.remove('active'));
-    $(id).classList.add('active');
-    window.scrollTo({top:0,behavior:'smooth'});
-  };
-
-  // Title: “あきらめる”を押したら挑発バージョンに切替（ボタン2つとも挑戦）
-  $('#start1').addEventListener('click', ()=>startGame());
-  $('#start2').addEventListener('click', ()=>{
-    $('#titleChip').textContent = '俺の強さに怖気づいたかっ！';
-    $('#titleImg').src = './title-quit2.png';
-    const btns = $('#titleBtns');
-    btns.innerHTML = `
-      <button class="btn primary" id="goA">挑戦する</button>
-      <button class="btn outline"  id="goB">挑戦する</button>`;
-    $('#goA').addEventListener('click', startGame);
-    $('#goB').addEventListener('click', startGame);
-  });
-
-  // ===== Game logic =====
-  const score = { you:0, boss:0 };
-  const bossHandEl = $('#bossHand');
-  const handsEl = $('#hands');
-  const scoreEl = $('#score');
-  const hintEl  = $('#hint');
-  const resultCard = $('#resultCard');
-  const restartRow = $('#restartRow');
-
-  function startGame(){
-    score.you = 0; score.boss = 0;
-    updateScore();
-    hintEl.textContent = '勝負を選んでね！';
-    bossHandEl.textContent = '✊';
-    resultCard.style.display = 'none';
-    restartRow.style.display = 'none';
-    handsEl.style.display = 'flex';
-    show('#game');
-  }
-
-  const winMap = { rock:'scissors', scissors:'paper', paper:'rock' };
-  const emojiMap = { rock:'✊', scissors:'✌️', paper:'🖐️' };
-
-  // 店長は 50% でプレイヤーに勝つ手を出す
-  function bossChoice(player){
-    const r = Math.random();
-    if(r < 0.5){
-      // 確率50%：プレイヤーに勝つ手
-      for (const [me,winTo] of Object.entries(winMap)){
-        if(winTo === player) return me;
+  <script>
+    // ---------- 画像切替（タイトル） ----------
+    const titleImg  = document.getElementById('titleImg');
+    const titlePill = document.getElementById('titlePill');
+    // たまに別ポーズに
+    function shuffleTitle(){
+      if (Math.random() < 0.5) {
+        titleImg.src = 'title-start2.png';
+        titlePill.textContent = 'めちゃつよっ！';
+      } else {
+        titleImg.src = 'title-quit2.png';
+        titlePill.textContent = '俺の強さに怖気づいたかっ！';
       }
     }
-    // 残り50%はランダム
-    const arr = ['rock','scissors','paper'];
-    return arr[Math.floor(Math.random()*3)];
-  }
+    shuffleTitle();
 
-  handsEl.addEventListener('click', (e)=>{
-    const btn = e.target.closest('.hand'); if(!btn) return;
-    const you = btn.dataset.hand;
-    const boss = bossChoice(you);
-    bossHandEl.textContent = emojiMap[boss];
+    // ---------- 画面切替 ----------
+    const titleView = document.getElementById('title');
+    const gameView  = document.getElementById('game');
+    document.getElementById('start1').onclick =
+    document.getElementById('start2').onclick = () => {
+      titleView.style.display = 'none';
+      gameView.style.display  = 'block';
+      resetGame();
+      // スクロール位置を先頭へ
+      window.scrollTo({top:0, behavior:'smooth'});
+    };
 
-    const result =
-      you === boss ? 'draw' :
-      winMap[you] === boss ? 'you' : 'boss';
+    // ---------- ジャンケン本体 ----------
+    const WIN_TARGET = 3;
+    const BOSS_EDGE  = 0.55;   // 店長がちょい強い（55%で勝ちに来る）
 
-    if(result === 'you'){ score.you++; }
-    else if(result === 'boss'){ score.boss++; }
+    const handsEl    = document.getElementById('hands');
+    const bossHandEl = document.getElementById('bossHand');
+    const scoreEl    = document.getElementById('score');
+    const messageEl  = document.getElementById('message');
+    const resultCard = document.getElementById('resultCard');
+    const restartRow = document.getElementById('restartRow');
 
-    // メッセージ
-    if(result === 'draw'){
-      hintEl.textContent = `あいこ！ 次の手を選んでね`;
-    }else if(result === 'you'){
-      hintEl.textContent = `あなたの勝ち！ 次の手を選んでね`;
-    }else{
-      hintEl.textContent = `店長の勝ち！ 次の手を選んでね`;
+    let score = { you:0, boss:0 };
+
+    const EMOJI = { rock:'✊', scissors:'✌️', paper:'✋' };
+    const WINMAP = { rock:'scissors', scissors:'paper', paper:'rock' };
+
+    function resetGame(){
+      score.you = 0; score.boss = 0;
+      updateScore();
+      messageEl.textContent = '勝負を選んでね！';
+      bossHandEl.textContent = '✊';
+      resultCard.style.display = 'none';
+      restartRow.style.display = 'none';
+      handsEl.style.display = 'flex';
     }
 
-    updateScore();
-    checkFinish();
-  });
+    function updateScore(){
+      scoreEl.textContent = `あなた ${score.you} - 店長 ${score.boss}`;
+    }
 
-  function updateScore(){
-    scoreEl.textContent = `あなた ${score.you} - 店長 ${score.boss}`;
-  }
+    function bossPick(player){
+      // 店長は 55% でプレイヤーに勝つ手を出す
+      const beat = ({rock:'paper', paper:'scissors', scissors:'rock'})[player];
+      const lose = WINMAP[player];      // プレイヤーが勝つ手
+      const tie  = player;
+      if (Math.random() < BOSS_EDGE) return beat;
+      // 45% は「あいこ」or「負け」を半々くらいで
+      return [lose, tie][Math.random()<0.5 ? 0 : 1];
+    }
 
-  function checkFinish(){
-    if(score.you >= 3 || score.boss >= 3){
-      handsEl.style.display = 'none';
-      restartRow.style.display = 'flex';
-      resultCard.style.display = 'block';
+    function play(player){
+      if (handsEl.style.display === 'none') return; // 終了後は無効
+      const boss = bossPick(player);
+      bossHandEl.textContent = EMOJI[boss];
 
-      if(score.you >= 3){
-        resultCard.innerHTML = `
-          <strong>🎉 あなたの勝ち！</strong>
-          <div class="utils">
-            <span class="pill">合言葉：ボリューミー店長</span>
-            <button class="btn outline" id="copyKey">コピー</button>
-          </div>
-          <div class="caption">LINEのトークでこの合言葉を送ってね！</div>`;
-        $('#copyKey').addEventListener('click', ()=>{
-          navigator.clipboard.writeText('ボリューミー店長');
-          $('#copyKey').textContent = 'コピーしたよ！';
-        });
-      }else{
-        resultCard.innerHTML = `<strong>👑 店長の勝ち！</strong><div class="caption">また挑戦してね！</div>`;
+      if (player === boss){
+        messageEl.textContent = 'あいこ！次の手を選んでね';
+      } else if (WINMAP[player] === boss){
+        // プレイヤーの勝ち
+        score.you++; updateScore();
+        messageEl.innerHTML = `<span class="win">あなたの勝ち！</span> 次の手を選んでね`;
+      } else {
+        // 店長の勝ち
+        score.boss++; updateScore();
+        messageEl.innerHTML = `<span class="lose">店長の勝ち！</span> 次の手を選んでね`;
+      }
+      checkFinish();
+    }
+
+    function checkFinish(){
+      if (score.you >= WIN_TARGET || score.boss >= WIN_TARGET){
+        handsEl.style.display = 'none';
+        resultCard.style.display = 'block';
+        restartRow.style.display = 'flex';
+
+        if (score.you >= WIN_TARGET){
+          resultCard.innerHTML = `
+            <strong>🎉 あなたの勝ち！</strong>
+            <div style="margin-top:6px">
+              この画面をスタッフに見せてプレゼント貰ってね！
+            </div>`;
+        } else {
+          resultCard.innerHTML = `
+            <strong>👑 店長の勝ち！</strong>
+            <div style="margin-top:6px">また挑戦してね！</div>`;
+        }
       }
     }
-  }
 
-  $('#restartBtn').addEventListener('click', startGame);
-</script>
+    // 手ボタン
+    document.querySelectorAll('.handBtn').forEach(btn=>{
+      btn.addEventListener('click', ()=> play(btn.dataset.hand));
+    });
+    document.getElementById('restartBtn').addEventListener('click', resetGame);
+
+    // iOSのセーフエリア余白対策（見映え）
+    function fixSafeBottom(){
+      document.body.style.paddingBottom = 'env(safe-area-inset-bottom, 0px)';
+    }
+    fixSafeBottom();
+    window.addEventListener('resize', fixSafeBottom);
+  </script>
 </body>
 </html>
