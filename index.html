@@ -210,7 +210,7 @@
   // 店長は 50% でプレイヤーに勝つ手を出す
   function bossChoice(player){
     const r = Math.random();
-    if(r < 0.5){
+    if(r < 0.1){
       // 確率50%：プレイヤーに勝つ手
       for (const [me,winTo] of Object.entries(winMap)){
         if(winTo === player) return me;
