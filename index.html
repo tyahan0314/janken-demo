@@ -117,21 +117,35 @@
   .scoopHud{display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap;font-weight:800;margin:8px 0}
   .scoopHud span{background:#ffffffcc;padding:8px 12px;border-radius:10px;box-shadow:0 6px 16px #00000012}
   .scoopBtns{display:flex;gap:10px}
-  .scoopBoard{width:min(520px,92vw);margin:12px auto 0;position:relative}
-  .scGrid{
-    display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
-    background:#bde3ef;padding:10px;border-radius:14px;
+
+  /* ▼ responsive 盤＆フォント（ここが追加/改善点） */
+  .scoopBoard{
+    --cols:4; --gap:10px; --pad:10px; --tile:80px;           /* JSで --tile を更新 */
+    width:min(520px,92vw); margin:12px auto 0; position:relative;
   }
-  .scGrid .cell{aspect-ratio:1/1;border-radius:10px;background:#e6f7fd}
-  .scTiles{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px}
+  .scGrid,
+  .scTiles{
+    display:grid;
+    grid-template-columns: repeat(var(--cols), var(--tile));
+    gap: var(--gap);
+    padding: var(--pad);
+    border-radius:14px;
+  }
+  .scGrid{ background:#bde3ef; }
+  .scGrid .cell{ width:var(--tile); height:var(--tile); border-radius:10px; background:#e6f7fd }
+  .scTiles{ position:absolute; inset:0 }
+
   .tile{
-    aspect-ratio:1/1;border-radius:12px;display:grid;place-items:center;
-    font-weight:900;text-align:center;line-height:1.1;
+    width:var(--tile); height:var(--tile);
+    border-radius:12px; display:grid; place-items:center;
+    font-weight:900; text-align:center; line-height:1.1;
     box-shadow:0 10px 24px rgba(0,0,0,.12); user-select:none;
-    animation: tileIn .18s ease;
-    color:#083b48;font-size:clamp(12px,3.6vw,15px)
+    animation: tileIn .18s ease; color:#083b48;
   }
-  .tile b{display:block;font-size:clamp(18px,6vw,26px)}
+  .tile b{ display:block; font-size: calc(var(--tile) * .42); } /* 基本はマスに比例 */
+  .tile.big  b{ font-size: calc(var(--tile) * .36); }  /* 3桁 */
+  .tile.huge b{ font-size: calc(var(--tile) * .30); }  /* 4桁以上 */
+
   @keyframes tileIn{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
   .tile.merge{animation: mergePop .22s ease}
   @keyframes mergePop{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
@@ -140,8 +154,20 @@
   .t32{background:#d8f0dc}.t64{background:#d7f0fb}
   .t128{background:#ffe9c2}.t256{background:#f7d9ff}
   .t512{background:#d9fff1}.t1024{background:#fff0c5}.t2048{background:#ffe7e7}
-  /* 画像タイル */
   .tileImg{ width:86%; height:86%; object-fit:contain; pointer-events:none; }
+
+  /* ▼ 矢印パッド */
+  .dirPad{ display:grid; grid-template-columns:repeat(3,64px); grid-template-rows:repeat(3,64px);
+    gap:10px; justify-content:center; margin:16px 0 0; }
+  .dirPad .spacer{ visibility:hidden }
+  .dirBtn{
+    font-size:22px; font-weight:900; border:none; cursor:pointer;
+    border-radius:14px; background:#ffffffcc; box-shadow:0 8px 18px #00000012;
+  }
+  .dirBtn:active{ transform:translateY(1px) }
+  @media (max-width:420px){
+    .dirPad{ grid-template-columns:repeat(3,56px); grid-template-rows:repeat(3,56px); gap:8px }
+  }
 </style>
 </head>
 <body>
@@ -201,9 +227,8 @@
     <!-- ===== 神経衰弱（🩵ライフ3／難易度） ===== -->
     <div class="container" id="memory">
       <h1>〜神経衰弱〜</h1>
-      <p class="sub">同じアイスを2枚めくってペアを作ろう！（4種=8枚 / 6種=12枚）</p>
+      <p class="sub">同じアイスを2枚めくってペアを作ろう！</p>
 
-      <!-- 難易度選択 -->
       <div class="memDiff">
         <button class="btn primary" id="memEasyBtn">やさしい</button>
         <button class="btn ghost"   id="memHardBtn">むずかしい</button>
@@ -212,11 +237,8 @@
       <div class="memHud" id="memHud" style="display:none">
         <span id="memMoves">手数: 0</span>
         <span id="memPairs">ペア: 0 / 4</span>
-        <!-- ライフ（🩵×3） -->
         <span class="lives" id="memLives" title="ライフ">
-          <span class="heart">🩵</span>
-          <span class="heart">🩵</span>
-          <span class="heart">🩵</span>
+          <span class="heart">🩵</span><span class="heart">🩵</span><span class="heart">🩵</span>
         </span>
         <button class="btn ghost" id="memRetry">もう一回</button>
       </div>
@@ -232,21 +254,31 @@
 
     <!-- ===== アイス合成パズル（2048系） ===== -->
     <div class="container" id="scoop" style="display:none">
-      <h1>〜アイス合成パズル〜</h1>
-      <p class="sub">同じアイスをスワイプ/矢印で合体！高ランクを目指そう</p>
+      <h1>〜2048パズル〜</h1>
+      <p class="sub">同じ数字を合体させて高ランクを目指そう</p>
 
       <div class="scoopHud">
         <span id="scScore">スコア: 0</span>
         <span id="scBest">ベスト: 0</span>
         <div class="scoopBtns">
-          <button class="btn ghost" id="scUndo">アンドゥ</button>
+          <button class="btn ghost" id="scUndo">1手戻る</button>
           <button class="btn ghost" id="scRetry">もう一回</button>
         </div>
       </div>
 
-      <div class="scoopBoard">
+      <div class="scoopBoard" id="boardWrap">
         <div class="scGrid" id="scGridBg"></div>
         <div class="scTiles" id="scTiles"></div>
+      </div>
+
+      <!-- ▼ 矢印パッド -->
+      <div class="dirPad" aria-label="方向ボタン">
+        <span class="spacer"></span>
+        <button class="dirBtn" id="padUp">↑</button>
+        <span class="spacer"></span>
+        <button class="dirBtn" id="padLeft">←</button>
+        <button class="dirBtn" id="padDown">↓</button>
+        <button class="dirBtn" id="padRight">→</button>
       </div>
 
       <div class="resultCard" id="scResult" style="display:none; margin-top:14px"></div>
@@ -302,7 +334,7 @@
   }
 
   /* =======================
-     ジャンケン（そのまま）
+     ジャンケン（完成版）
      ======================= */
   function startGame(){
     titleView.style.display = 'none';
@@ -387,8 +419,8 @@
     { img:'ice2.png', emoji:'🍫', name:'チョコ' },
     { img:'ice3.png', emoji:'🍵', name:'そのぎ茶' },
     { img:'ice4.png', emoji:'🔔', name:'ちりんちりんくん' },
-    { img:'ice5.png', emoji:'🍓', name:'店長1' },
-    { img:'ice6.png', emoji:'🍈', name:'店長2' }
+    { img:'ice5.png', emoji:'👨', name:'店長1' },
+    { img:'ice6.png', emoji:'🧑', name:'店長2' }
   ];
 
   const memGrid   = document.getElementById('memGrid');
@@ -567,15 +599,11 @@
   const scUndo   = document.getElementById('scUndo');
   const scRetry  = document.getElementById('scRetry');
   const scResult = document.getElementById('scResult');
+  const boardWrap= document.getElementById('boardWrap');
 
   // 2〜64は数値表示、128〜は画像（無ければ数字にフォールバック）
-  const FLAVORS = {
-    2:{name:'2'}, 4:{name:'4'}, 8:{name:'8'}, 16:{name:'16'},
-    32:{name:'32'}, 64:{name:'64'}
-  };
-  const IMAGE_LABEL = {
-    128:'屋台', 256:'アイス', 512:'店長', 1024:'店長キメポーズ', 2048:'社長'
-  };
+  const FLAVORS = { 2:{name:'2'}, 4:{name:'4'}, 8:{name:'8'}, 16:{name:'16'}, 32:{name:'32'}, 64:{name:'64'} };
+  const IMAGE_LABEL = { 128:'屋台', 256:'アイス', 512:'店長', 1024:'店長キメポーズ', 2048:'社長' };
 
   let board = [];       // 16長配列（0=空）
   let scoreNow = 0;
@@ -589,9 +617,19 @@
     best = Number(localStorage.getItem('scoop_best') || 0);
     scoreNow = 0; board = new Array(16).fill(0); prevState=null;
     spawn(); spawn();
+    setBoardTileSize();  // ← 盤サイズに合わせて--tile更新
     draw();
     scResult.style.display='none';
   }
+
+  // 盤幅から1マスのpxを算出して --tile に反映（リサイズ対応）
+  function setBoardTileSize(){
+    const wrapW = boardWrap.clientWidth;    // .scoopBoard の幅
+    const gap=10, pad=10, cols=4;
+    const tile = Math.floor( (wrapW - pad*2 - gap*(cols-1)) / cols );
+    boardWrap.style.setProperty('--tile', tile+'px');
+  }
+  window.addEventListener('resize', setBoardTileSize);
 
   function spawn(){
     const zeros = board.map((v,i)=>v===0?i:null).filter(v=>v!==null);
@@ -651,25 +689,20 @@
     if (scoreNow>best){ best=scoreNow; localStorage.setItem('scoop_best', String(best)); }
     spawn();
     draw();
-    checkState(totalGain);
+    checkState();
   }
 
   function checkState(){
     const maxTile = Math.max(...board);
-    // 2048達成時のみ「おめでとう」表示
     if (maxTile >= 2048){
       scResult.style.display='block';
-      scResult.innerHTML = `
-        <strong>🎉 2048達成！${IMAGE_LABEL[2048] || ''}</strong>
-        <div style="margin-top:6px">おめでとう！</div>`;
+      scResult.innerHTML = `<strong>🎉 2048達成！${IMAGE_LABEL[2048] || ''}</strong><div style="margin-top:6px">おめでとう！</div>`;
     } else {
       scResult.style.display='none';
     }
     if (!canMove()){
       scResult.style.display='block';
-      scResult.innerHTML = `
-        <strong>💥 おしまい！</strong>
-        <div style="margin-top:6px">スコア ${scoreNow}（ベスト ${best}） また挑戦してね！</div>`;
+      scResult.innerHTML = `<strong>💥 おしまい！</strong><div style="margin-top:6px">スコア ${scoreNow}（ベスト ${best}） また挑戦してね！</div>`;
     }
   }
 
@@ -681,12 +714,15 @@
       const t = document.createElement('div');
       t.className = `tile t${v}`;
 
+      const digits = String(v).length;
+      if (digits===3) t.classList.add('big');
+      if (digits>=4)  t.classList.add('huge');
+
       if (v >= 128){
         const img = document.createElement('img');
         img.className = 'tileImg';
         img.src = `puzzle${v}.png`;
         img.alt = IMAGE_LABEL[v] || String(v);
-        // 画像が無い場合は数字にフォールバック
         img.addEventListener('error', ()=>{
           img.remove();
           t.innerHTML = `<b>${v}</b>`;
@@ -702,7 +738,7 @@
     scBest.textContent  = `ベスト: ${best}`;
   }
 
-  // 入力
+  // 入力（キーボード・スワイプ・矢印パッド）
   window.addEventListener('keydown', (e)=>{
     if (scoopView.style.display!=='block') return;
     const k=e.key;
@@ -725,6 +761,12 @@
     board = prevState.board.slice(); scoreNow = prevState.score; prevState=null; draw(); scResult.style.display='none';
   });
   document.getElementById('scRetry').addEventListener('click', setupScoop);
+
+  // 矢印パッド
+  document.getElementById('padUp').addEventListener('click', ()=>move('U'));
+  document.getElementById('padLeft').addEventListener('click', ()=>move('L'));
+  document.getElementById('padDown').addEventListener('click', ()=>move('D'));
+  document.getElementById('padRight').addEventListener('click', ()=>move('R'));
 </script>
 </body>
 </html>
