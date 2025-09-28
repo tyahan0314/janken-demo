@@ -10,10 +10,9 @@
      ========================= -->
 <style>
   :root{
-    /* サイト全体の色 */
     --bg:#97d2e4; --ink:#0c2a33; --muted:#215b6b; --white:#fff;
     --pill:#e6f7fd; --btn:#10aee3; --btn-ink:#fff; --card:#ffffffef;
-    --win:#0da66e; --lose:#d94848;
+    --win:#0da66e; --lose:#d94848; --accent:#e53935;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -22,7 +21,7 @@
     font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans JP",sans-serif
   }
   .wrap{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
-  .container{width:min(920px,92vw);margin:0 auto;padding:16px 0 28px}
+  .container{width:min(880px,92vw);margin:0 auto;padding:16px 0 24px}
 
   /* 共通見出し */
   h1{margin:8px 0 4px;font-size:clamp(22px,5.8vw,36px);letter-spacing:.06em;text-align:center}
@@ -38,6 +37,7 @@
   .btn.primary{background:var(--btn);color:var(--btn-ink);padding:14px 22px;font-size:clamp(14px,4.8vw,18px)}
   .btn.ghost{background:transparent;color:#083b48;border:2px solid #083b4840;
     padding:12px 20px;border-radius:16px;font-size:clamp(14px,4.8vw,18px)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
 
   /* ===== タイトル画面 ===== */
   #title{display:grid;place-items:center}
@@ -57,24 +57,20 @@
     margin-top:4px;display:flex;align-items:flex-start;justify-content:space-between;gap:clamp(10px,4vw,18px)
   }
   .frameBox{
-    /* 左上：店長の手を入れる額縁 */
     position:relative;flex:0 0 auto;
     width:clamp(160px,40vw,320px);aspect-ratio:3/4;
     background:url("frame2.png") center/contain no-repeat;
   }
   .bossHandImg{
-    /* 額縁の内側に、店長の手画像（グー/チョキ/パー）をフィットさせる */
     position:absolute;left:8%;top:6%;width:84%;height:88%;
     object-fit:contain;filter:drop-shadow(0 10px 16px #00000018);
   }
   .bossPic{
-    /* 右上：店長の写真 */
     flex:0 0 auto;width:clamp(200px,42vw,360px);height:auto;object-fit:contain;
     filter:drop-shadow(0 10px 20px rgba(0,0,0,.12))
   }
   .hands{margin:16px auto 0;display:flex;justify-content:center;gap:clamp(12px,4vw,18px)}
   .handBtn{
-    /* プレイヤーの✊✌️✋ボタン（画像でなく絵文字） */
     width:clamp(92px,22vw,136px);aspect-ratio:1/1;border-radius:18px;background:var(--white);
     box-shadow:0 10px 30px #075a6a22;display:grid;place-items:center;
     font-size:clamp(34px,10vw,52px);cursor:pointer;border:none
@@ -84,7 +80,7 @@
   .restartRow{display:none;justify-content:center;margin:14px 0 0}
   .win{color:var(--win);font-weight:800}.lose{color:var(--lose);font-weight:800}
 
-  /* ===== 神経衰弱（ソロ） ===== */
+  /* ===== 神経衰弱（正方形カード） ===== */
   #memory{display:none}
   .memDiff{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin: 6px 0 6px; }
   .memHud{
@@ -94,14 +90,13 @@
   .memGrid{
     --gap: clamp(10px, 3.4vw, 14px);
     display:grid; gap: var(--gap);
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, 1fr); /* 8枚=2行、12枚=3行 */
     width:min(740px, 92vw); margin: 0 auto;
   }
   .memCard{ aspect-ratio: 1 / 1; perspective: 1000px; position:relative; }
   .memInner{
     position:absolute; inset:0; transition: transform .42s ease;
-    transform-style: preserve-3d;
-    transform: rotateY(180deg);
+    transform-style: preserve-3d; transform: rotateY(180deg);
   }
   .memInner.flipped{ transform: rotateY(0deg); }
   .memFace{
@@ -134,13 +129,12 @@
   }
   .scGrid .cell{aspect-ratio:1/1;border-radius:10px;background:#e6f7fd}
   .scTiles{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px}
-  .scTiles > .slot{ aspect-ratio: 1 / 1; }       /* ← 1マスの“枠” */
+  .scTiles > .slot{ aspect-ratio: 1 / 1; }
   .tile{
-    width:100%; height:100%; border-radius:12px; display:grid; place-items:center;
+    width:100%; height:100%; border-radius:12px;display:grid;place-items:center;
     font-weight:900;text-align:center;line-height:1.1;
     box-shadow:0 10px 24px rgba(0,0,0,.12); user-select:none;
-    animation: tileIn .18s ease;
-    color:#083b48;font-size:clamp(12px,3.6vw,15px)
+    animation: tileIn .18s ease; color:#083b48;font-size:clamp(12px,3.6vw,15px)
   }
   .tile b{display:block;font-size:clamp(18px,6vw,26px)}
   @keyframes tileIn{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
@@ -154,70 +148,55 @@
   .tileImg{ width:86%; height:86%; object-fit:contain; pointer-events:none; }
   #scPad{ position:sticky; bottom:env(safe-area-inset-bottom, 12px); display:none; margin-top:16px; }
   .pad{ width:180px; height:160px; margin:0 auto; position:relative; display:grid; place-items:center; }
-  .pad button{
-    position:absolute; width:56px; height:56px; border-radius:50%;
-    border:none; background:#ffffffd8; box-shadow:0 8px 18px #00000018;
-    font-size:22px; font-weight:900; color:#0c2a33; cursor:pointer;
-  }
+  .pad button{ position:absolute; width:56px; height:56px; border-radius:50%;
+    border:none; background:#ffffffd8; box-shadow:0 8px 18px #00000018; font-size:22px; font-weight:900; color:#0c2a33; cursor:pointer; }
   .pad .up{top:0; left:50%; transform:translate(-50%,0)}
   .pad .down{bottom:0; left:50%; transform:translate(-50%,0)}
   .pad .left{left:0; top:50%; transform:translate(0,-50%)}
   .pad .right{right:0; top:50%; transform:translate(0,-50%)}
 
-  /* ====== 2人対戦（共通UI） ====== */
-  #versus, #ttt, #mem2, #c4{display:none}
-  .vsBar{
-    display:flex; gap:10px; justify-content:center; align-items:center;
-    flex-wrap:wrap; margin:6px 0 10px;
+  /* ===== 2人で遊ぶ：キャラ選択 ===== */
+  #duoSelect{display:none}
+  .charGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;width:min(740px,92vw);margin:10px auto 0}
+  .charCard{position:relative;background:#fff;border-radius:16px;box-shadow:0 10px 20px #00000018;padding:10px;display:grid;place-items:center;cursor:pointer}
+  .charCard img{width:100%;height:auto;object-fit:contain;border-radius:12px}
+  .charLabel{margin-top:6px;font-weight:800}
+  .charCard .badge{position:absolute;top:8px;left:8px;background:#00000080;color:#fff;font-size:12px;border-radius:999px;padding:.2em .6em;display:none}
+  .charCard.selectedP1::after,
+  .charCard.selectedP2::after{
+    content:attr(data-select-label);
+    position:absolute;top:8px;left:8px;background:#10aee3;color:#fff;padding:.25em .6em;border-radius:999px;font-size:12px;font-weight:800
   }
-  .vsBar .side{
-    display:flex; gap:8px; align-items:center; background:#ffffffcc;
-    padding:6px 10px; border-radius:999px; box-shadow:0 6px 14px #00000012;
-    font-weight:800;
-  }
-  .vsBar img{ width:28px; height:28px; border-radius:50%; object-fit:cover }
-  .vsBar .mid{ font-weight:800; color:#0c2a33; }
+  .selectHint{margin:6px 0 0;text-align:center;font-weight:800}
 
-  .vsPick{ display:grid; grid-template-columns:1fr 1fr; gap:14px; align-items:flex-start }
-  .pickCol{ background:#ffffffcc; border-radius:14px; padding:10px; box-shadow:0 8px 18px #00000014 }
-  .pickHead{ font-weight:800; margin:2px 0 8px }
-  .charPick{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px }
-  .charPick button{
-    border:none; background:#fff; border-radius:12px; padding:8px; cursor:pointer;
-    box-shadow:0 8px 18px #00000014; display:grid; place-items:center; gap:6px; font-weight:700
-  }
-  .charPick img{ width:76px; height:76px; object-fit:cover; border-radius:8px }
-  .charPick button.selected{ outline:3px solid #10aee3 }
+  /* ===== 2人対戦（◯✖） ===== */
+  #duoMenu{display:none}
+  #ttt{display:none}
+  .pHud{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin:8px 0 12px}
+  .pCard{display:flex;align-items:center;gap:10px;background:#ffffffcc;border:3px solid transparent;border-radius:16px;padding:8px 12px;box-shadow:0 8px 18px #00000014;min-width:clamp(160px,40vw,280px)}
+  .pIcon{width:64px;height:64px;border-radius:50%;object-fit:cover;background:#fff}
+  .pName{font-weight:900}
+  .pLine{font-size:13px;color:#083b48; margin-top:2px}
+  .pCard.active{ border-color:var(--accent); box-shadow:0 0 0 4px #e5393526; }
+  .turnLabel{font-weight:900;margin:0 auto}
 
-  /* 〇✕（3×3） */
+  /* 盤：背景ステージ + 実マス */
+  .tttStage{ 
+    background:url("stage3x3.png") center/contain no-repeat;
+    padding:14px;border-radius:20px; 
+    box-shadow:0 12px 28px #07495926;
+    width:min(560px,92vw); margin:0 auto;
+  }
   .tttBoard{
-    width:min(520px, 92vw); margin:10px auto; display:grid; gap:8px;
-    grid-template-columns:repeat(3,1fr);
-    background:#bde3ef; padding:10px; border-radius:14px;
-    background-image:url('stage3x3.png'); background-size:contain; background-position:center; background-repeat:no-repeat;
+    display:grid;grid-template-columns:repeat(3,1fr);gap:12px
   }
-  .tttCell{
-    aspect-ratio:1/1; display:grid; place-items:center; border-radius:12px;
-    background:#e6f7fd; font-size:clamp(32px,10vw,52px); font-weight:900; cursor:pointer;
-    box-shadow:0 10px 22px #00000010;
+  .cell{
+    aspect-ratio:1/1;border-radius:14px;background:#e6f7fd;display:grid;place-items:center;
+    font-weight:900;font-size:clamp(28px,10vw,56px);color:#083b48;cursor:pointer;
+    box-shadow:inset 0 0 0 2px #083b4814;
   }
-
-  /* 四目並べ（7×6） */
-  .c4Board{
-    position:relative;
-    width:min(620px, 92vw); margin:10px auto; display:grid; grid-template-columns:repeat(7,1fr); gap:8px;
-    background:#bde3ef; padding:10px; border-radius:14px;
-    background-image:url('stage7x6.png'); background-size:contain; background-position:center; background-repeat:no-repeat;
-  }
-  .c4Cell{
-    aspect-ratio:1/1; background:#e6f7fd; border-radius:50%; position:relative;
-    box-shadow:inset 0 0 0 6px #cfeef8, 0 10px 20px #00000014;
-  }
-  .c4Cell .disc{
-    position:absolute; inset:6px; border-radius:50%; box-shadow:0 8px 18px #00000020;
-  }
-  .disc.p1{ background:#10aee3 } /* P1色 */
-  .disc.p2{ background:#0da66e } /* P2色 */
+  .cell.disabled{pointer-events:none;opacity:.65}
+  .bubble{display:none;margin:10px auto 0;max-width:720px;background:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 12px 28px #07495926;text-align:center;font-weight:800}
 </style>
 </head>
 
@@ -230,26 +209,22 @@
       <span class="pill" id="titlePill">めちゃつよっ！</span>
       <h2>ボリューミー店長との<br>じゃんけん対決！</h2>
 
-      <!-- 店長画像（最初は挑発ポーズ）。諦める→やっぱ挑戦で差し替え -->
       <img id="titleImg" class="title-illus" src="title-start2.png" alt="店長ポーズ">
       <div id="speech" class="speech">俺の強さに怖気づいたかっ！</div>
 
-      <!-- じゃんけんへ / 諦める→「挑戦する」に一度だけ変身 -->
       <div class="btnrow">
         <button class="btn primary" id="btnStart">挑戦する</button>
         <button class="btn ghost"   id="btnQuit"  data-mode="quit">あきらめる</button>
       </div>
 
-      <!-- ほかのゲームへ直行 -->
       <div class="btnrow">
         <button class="btn ghost" id="btnMem">神経衰弱で遊ぶ</button>
       </div>
       <div class="btnrow">
         <button class="btn ghost" id="btnScoop">合成パズルで遊ぶ</button>
       </div>
-      <!-- 2人対戦 -->
       <div class="btnrow">
-        <button class="btn ghost" id="btnVs">2人で遊ぶ</button>
+        <button class="btn ghost" id="btnDuo">2人で遊ぶ</button>
       </div>
 
       <p class="title-note">めちゃつよ店長に勝利しよう！</p>
@@ -287,7 +262,7 @@
     </div>
   </div>
 
-  <!-- ============= 神経衰弱（ソロ：ライフ3＋難易度） ============= -->
+  <!-- ============= 神経衰弱 ============= -->
   <div class="container" id="memory">
     <h1>〜神経衰弱〜</h1>
     <p class="sub">同じアイスを2枚めくってペアを作ろう！</p>
@@ -301,9 +276,7 @@
       <span id="memMoves">手数: 0</span>
       <span id="memPairs">ペア: 0 / 4</span>
       <span class="lives" id="memLives" title="ライフ">
-        <span class="heart">🩵</span>
-        <span class="heart">🩵</span>
-        <span class="heart">🩵</span>
+        <span class="heart">🩵</span><span class="heart">🩵</span><span class="heart">🩵</span>
       </span>
       <button class="btn ghost" id="memRetry">もう一回</button>
     </div>
@@ -316,7 +289,7 @@
     </div>
   </div>
 
-  <!-- ============= 2048（アイス合成パズル） ============= -->
+  <!-- ============= 2048 ============= -->
   <div class="container" id="scoop">
     <h1>〜2048パズル〜</h1>
     <p class="sub">同じ数字を合体させて高スコアを目指そう</p>
@@ -351,106 +324,68 @@
     </div>
   </div>
 
-  <!-- ============= 2人対戦：キャラ選択＆メニュー ============= -->
-  <div class="container" id="versus">
+  <!-- ============= 2人で遊ぶ：キャラ選択 ============= -->
+  <div class="container" id="duoSelect">
     <h1>2人で遊ぶ</h1>
-    <!-- Step1: キャラ選択 -->
-    <div id="vsStepPick">
-      <p class="sub">プレイヤー1と2のキャラを選んでね（同じキャラもOK！）</p>
-      <div class="vsPick">
-        <div class="pickCol">
-          <div class="pickHead">プレイヤー1</div>
-          <div class="charPick" id="pick1"></div>
-        </div>
-        <div class="pickCol">
-          <div class="pickHead">プレイヤー2</div>
-          <div class="charPick" id="pick2"></div>
-        </div>
-      </div>
-      <div id="vsHint" class="title-note" style="display:none">「俺が2人！？」（2Pは冬服になるよ）</div>
-      <div class="btnrow">
-        <button class="btn primary" id="vsGoGames" disabled>ゲームを選ぶ</button>
-      </div>
-    </div>
+    <p class="sub" id="selectWho">プレイヤー1のキャラを選んでね（同じキャラは<em>店長だけOK</em>）</p>
+    <div class="selectHint" id="selectHint">P1 → P2 の順にタップで選択</div>
 
-    <!-- Step2: ゲーム選択 -->
-    <div id="vsStepGames" style="display:none">
-      <h1 style="margin-top:6px">対戦ゲームを選ぶ</h1>
-      <div class="btnrow">
-        <button class="btn primary" id="vsPlayTTT">◯✖️ゲーム（3×3）</button>
-        <button class="btn ghost"   id="vsPlayMem">神経衰弱（7種類）</button>
-        <button class="btn ghost"   id="vsPlayC4">コイン落とし（四目並べ）</button>
-      </div>
-      <div class="btnrow">
-        <button class="btn ghost" id="vsRePick">キャラを選び直す</button>
-      </div>
-    </div>
+    <div class="charGrid" id="charGrid"></div>
 
     <div class="btnrow">
-      <button class="btn ghost" id="vsBackTitle">タイトルへ戻る</button>
+      <button class="btn primary" id="toDuoMenu" disabled>ゲームを選ぶ</button>
+      <button class="btn ghost" id="selBack">タイトルへ戻る</button>
     </div>
   </div>
 
-  <!-- ============= VS: 〇✕ゲーム ============= -->
+  <!-- ============= 2人で遊ぶ：ゲームメニュー ============= -->
+  <div class="container" id="duoMenu">
+    <h1>2人対戦で遊ぶゲーム</h1>
+    <div class="btnrow">
+      <button class="btn primary" id="playTTT">◯✖（マルバツ）</button>
+      <!-- 将来用：神経衰弱7種／四目並べをここに追加 -->
+    </div>
+    <div class="btnrow">
+      <button class="btn ghost" id="duoBackToSelect">キャラ選びに戻る</button>
+      <button class="btn ghost" id="duoBackToTitle">タイトルへ戻る</button>
+    </div>
+  </div>
+
+  <!-- ============= 2人対戦：◯✖ゲーム本体 ============= -->
   <div class="container" id="ttt">
-    <h1>〜◯✖️ゲーム〜</h1>
-    <div class="vsBar">
-      <div class="side">
-        <img id="tttP1Img" alt=""><span id="tttP1Name"></span>
-      </div>
-      <div class="mid" id="tttTurn">P1のターン</div>
-      <div class="side">
-        <img id="tttP2Img" alt=""><span id="tttP2Name"></span>
-      </div>
-    </div>
-    <div class="tttBoard" id="tttBoard" aria-label="3x3 board"></div>
-    <div class="resultCard" id="tttResult" style="display:none;margin-top:12px"></div>
-    <div class="btnrow" style="margin-top:10px">
-      <button class="btn ghost" id="tttAgain">もう一回</button>
-      <button class="btn ghost" id="tttToMenu">他のゲームへ</button>
-      <button class="btn ghost" id="tttToTitle">タイトルへ戻る</button>
-    </div>
-  </div>
+    <h1>〜◯✖ ゲーム〜</h1>
 
-  <!-- ============= VS: 神経衰弱（7種類×2=14枚） ============= -->
-  <div class="container" id="mem2">
-    <h1>〜神経衰弱（対戦）〜</h1>
-    <div class="vsBar">
-      <div class="side">
-        <img id="mem2P1Img" alt=""><span id="mem2P1Name"></span><b id="mem2Score1" style="margin-left:6px">0</b>
+    <div class="pHud">
+      <div class="pCard" id="p1Card">
+        <img class="pIcon" id="p1Icon" alt="">
+        <div>
+          <div class="pName" id="p1Name">P1</div>
+          <div class="pLine" id="p1Line"></div>
+        </div>
       </div>
-      <div class="mid" id="mem2Turn">P1のターン</div>
-      <div class="side">
-        <img id="mem2P2Img" alt=""><span id="mem2P2Name"></span><b id="mem2Score2" style="margin-left:6px">0</b>
-      </div>
-    </div>
-    <div class="memGrid" id="mem2Grid" aria-label="カードの場"></div>
-    <div class="resultCard" id="mem2Result" style="display:none;margin-top:12px"></div>
-    <div class="btnrow" style="margin-top:10px">
-      <button class="btn ghost" id="mem2Again">もう一回</button>
-      <button class="btn ghost" id="mem2ToMenu">他のゲームへ</button>
-      <button class="btn ghost" id="mem2ToTitle">タイトルへ戻る</button>
-    </div>
-  </div>
 
-  <!-- ============= VS: 四目並べ（7×6） ============= -->
-  <div class="container" id="c4">
-    <h1>〜コイン落とし（四目並べ）〜</h1>
-    <div class="vsBar">
-      <div class="side">
-        <img id="c4P1Img" alt=""><span id="c4P1Name"></span>
-      </div>
-      <div class="mid" id="c4Turn">P1のターン</div>
-      <div class="side">
-        <img id="c4P2Img" alt=""><span id="c4P2Name"></span>
+      <div class="turnLabel" id="turnLabel">P1のターン</div>
+
+      <div class="pCard" id="p2Card">
+        <img class="pIcon" id="p2Icon" alt="">
+        <div>
+          <div class="pName" id="p2Name">P2</div>
+          <div class="pLine" id="p2Line"></div>
+        </div>
       </div>
     </div>
-    <div class="c4Board" id="c4Board" aria-label="7x6 board"></div>
-    <div class="resultCard" id="c4Result" style="display:none;margin-top:12px"></div>
-    <div class="btnrow" style="margin-top:10px">
-      <button class="btn ghost" id="c4Again">もう一回</button>
-      <button class="btn ghost" id="c4ToMenu">他のゲームへ</button>
-      <button class="btn ghost" id="c4ToTitle">タイトルへ戻る</button>
+
+    <!-- ステージ背景付きの盤ラッパ -->
+    <div class="tttStage">
+      <div class="tttBoard" id="tttBoard"></div>
+    </div>
+
+    <div class="bubble" id="tttBubble"></div>
+
+    <div class="btnrow" style="margin-top:12px">
+      <button class="btn primary" id="tttRetry" style="display:none">もう一回</button>
+      <button class="btn ghost" id="tttToMenu" style="display:none">他のゲームへ</button>
+      <button class="btn ghost" id="tttBack">タイトルへ戻る</button>
     </div>
   </div>
 
@@ -465,10 +400,9 @@
   const gameView  = document.getElementById('game');
   const memView   = document.getElementById('memory');
   const scoopView = document.getElementById('scoop');
-  const vsView    = document.getElementById('versus');
+  const duoSelect = document.getElementById('duoSelect');
+  const duoMenu   = document.getElementById('duoMenu');
   const tttView   = document.getElementById('ttt');
-  const mem2View  = document.getElementById('mem2');
-  const c4View    = document.getElementById('c4');
 
   /* ---------- タイトルのボタン ---------- */
   const titleImg  = document.getElementById('titleImg');
@@ -477,7 +411,7 @@
   const btnQuit   = document.getElementById('btnQuit');
   const btnMem    = document.getElementById('btnMem');
   const btnScoop  = document.getElementById('btnScoop');
-  const btnVs     = document.getElementById('btnVs');
+  const btnDuo    = document.getElementById('btnDuo');
 
   btnQuit.addEventListener('click', () => {
     if (btnQuit.dataset.mode === 'quit') {
@@ -488,36 +422,49 @@
       btnQuit.classList.remove('ghost');
       btnQuit.classList.add('primary');
     } else {
-      startGame(); // 次は本当に開始
+      startGame();
     }
   });
   btnStart.addEventListener('click', startGame);
   btnMem.addEventListener('click', showMemoryMenu);
   btnScoop.addEventListener('click', showScoop);
-  btnVs.addEventListener('click', showVs);
+  btnDuo.addEventListener('click', showDuoSelect);
 
-  function hideAll(){
-    [titleView, gameView, memView, scoopView, vsView, tttView, mem2View, c4View].forEach(v=>v.style.display='none');
-  }
   function showTitle(){
-    hideAll(); titleView.style.display='block';
-    speech.style.display='none'; titleImg.src = 'title-start2.png';
-    btnQuit.textContent = 'あきらめる'; btnQuit.dataset.mode = 'quit';
-    btnQuit.classList.add('ghost'); btnQuit.classList.remove('primary');
-    document.getElementById('scPad').style.display='none'; // 2048パッドを隠す
+    gameView.style.display='none';
+    memView.style.display='none';
+    scoopView.style.display='none';
+    duoSelect.style.display='none';
+    duoMenu.style.display='none';
+    tttView.style.display='none';
+
+    titleView.style.display='block';
+    speech.style.display='none';
+    titleImg.src = 'title-start2.png';
+    btnQuit.textContent = 'あきらめる';
+    btnQuit.dataset.mode = 'quit';
+    btnQuit.classList.add('ghost');
+    btnQuit.classList.remove('primary');
     window.scrollTo({top:0, behavior:'smooth'});
   }
 
-  /* =================================================
-     じゃんけん（店長やや強め）
-     ================================================= */
+  /* =======================
+     じゃんけん（完成版）
+     ======================= */
   function startGame(){
-    hideAll(); gameView.style.display='block';
+    titleView.style.display='none';
+    gameView.style.display='block';
+    memView.style.display='none';
+    scoopView.style.display='none';
+    duoSelect.style.display='none';
+    duoMenu.style.display='none';
+    tttView.style.display='none';
     resetGame();
     window.scrollTo({top:0,behavior:'smooth'});
   }
+
   const WIN_TARGET = 3;
-  const BOSS_EDGE  = 0.70;
+  const BOSS_EDGE  = 0.70; // 店長ちょい強め
 
   const scoreEl    = document.getElementById('score');
   const messageEl  = document.getElementById('message');
@@ -535,20 +482,25 @@
     updateScore();
     messageEl.textContent = '手を選んでね！';
     bossHandImg.src = IMG.rock;
-    resultCard.style.display = 'none'; restartRow.style.display = 'none';
+    resultCard.style.display = 'none';
+    restartRow.style.display = 'none';
     handsWrap.style.display = 'flex';
   }
   function updateScore(){ scoreEl.textContent = `あなた ${score.you} - 店長 ${score.boss}`; }
+
   function bossPick(player){
-    const beat = ({rock:'paper', paper:'scissors', scissors:'rock'})[player]; // 店長が勝つ手
-    const lose = WINMAP[player]; const tie  = player;
+    const beat = ({rock:'paper', paper:'scissors', scissors:'rock'})[player];
+    const lose = WINMAP[player];
+    const tie  = player;
     if (Math.random() < BOSS_EDGE) return beat;
     return [lose, tie][Math.random()<0.5 ? 0 : 1];
   }
+
   function play(player){
     if (handsWrap.style.display === 'none') return;
     const boss = bossPick(player);
     bossHandImg.src = IMG[boss];
+
     if (player === boss){
       messageEl.textContent = 'あいこ！次の手を選んでね';
     }else if (WINMAP[player] === boss){
@@ -560,6 +512,7 @@
     }
     checkFinish();
   }
+
   function checkFinish(){
     if (score.you >= WIN_TARGET || score.boss >= WIN_TARGET){
       handsWrap.style.display = 'none';
@@ -572,13 +525,24 @@
       }
     }
   }
+
   document.querySelectorAll('.handBtn').forEach(b=>b.addEventListener('click', ()=>play(b.dataset.hand)));
   document.getElementById('restartBtn').addEventListener('click', resetGame);
   document.getElementById('backToTitle1').addEventListener('click', showTitle);
 
-  /* =================================================
-     神経衰弱（ソロ）
-     ================================================= */
+  /* =======================
+     神経衰弱（🩵ライフ3＋難易度）
+     ======================= */
+  const USE_ICE_IMAGES = true; // ice画像が無い時は絵文字にフォールバック
+  const ICE_SET = [
+    { img:'ice1.png', emoji:'🍨', name:'プレーン' },
+    { img:'ice2.png', emoji:'🍫', name:'チョコ' },
+    { img:'ice3.png', emoji:'🍵', name:'そのぎ茶' },
+    { img:'ice4.png', emoji:'🔔', name:'ちりんちりんくん' },
+    { img:'ice5.png', emoji:'👨', name:'店長1' },
+    { img:'ice6.png', emoji:'🧑', name:'店長2' }
+  ];
+
   const memGrid   = document.getElementById('memGrid');
   const memHud    = document.getElementById('memHud');
   const memMoves  = document.getElementById('memMoves');
@@ -591,50 +555,68 @@
   const memHardBtn= document.getElementById('memHardBtn');
 
   const MAX_LIVES = 3;
-  let TYPES_COUNT = 4; // 4 or 6
-  let memDeck = []; // {id}
+  let TYPES_COUNT = 4;
+  let memDeck = [];
   let first = null, second = null, lock = false;
   let pairs = 0, moves = 0;
   let lives = MAX_LIVES;
   let memOver = false;
 
   function showMemoryMenu(){
-    hideAll(); memView.style.display='block';
-    memHud.style.display = 'none'; memGrid.innerHTML = ''; memResult.style.display = 'none';
+    titleView.style.display='none';
+    gameView.style.display='none';
+    scoopView.style.display='none';
+    duoSelect.style.display='none';
+    duoMenu.style.display='none';
+    tttView.style.display='none';
+
+    memView.style.display='block';
+    memHud.style.display = 'none';
+    memGrid.innerHTML = '';
+    memResult.style.display = 'none';
     window.scrollTo({top:0, behavior:'smooth'});
   }
+
   memEasyBtn.addEventListener('click', ()=> startMemory(4));
   memHardBtn.addEventListener('click', ()=> startMemory(6));
 
   function startMemory(types=4){
-    TYPES_COUNT = types; buildMemDeck(); renderMem();
-    pairs = 0; moves = 0; lock = false; first = second = null; memOver = false; lives = MAX_LIVES;
-    updateMemHud(); renderLives(); memResult.style.display = 'none'; memHud.style.display = 'flex';
+    TYPES_COUNT = types;
+    buildMemDeck();
+    renderMem();
+    pairs = 0; moves = 0; lock = false; first = second = null;
+    memOver = false; lives = MAX_LIVES;
+    updateMemHud(); renderLives();
+    memResult.style.display = 'none';
+    memHud.style.display = 'flex';
     window.scrollTo({top:0, behavior:'smooth'});
   }
-  function updateMemHud(){ memMoves.textContent = `手数: ${moves}`; memPairs.textContent = `ペア: ${pairs} / ${TYPES_COUNT}`; }
-  function renderLives(){ const hearts = memLives.querySelectorAll('.heart'); hearts.forEach((h,i)=> h.classList.toggle('lost', i >= lives)); }
+  function updateMemHud(){
+    memMoves.textContent = `手数: ${moves}`;
+    memPairs.textContent = `ペア: ${pairs} / ${TYPES_COUNT}`;
+  }
+  function renderLives(){
+    const hearts = memLives.querySelectorAll('.heart');
+    hearts.forEach((h,i)=> h.classList.toggle('lost', i >= lives));
+  }
   function buildMemDeck(){
-    memDeck = []; for(let i=0;i<TYPES_COUNT;i++){ memDeck.push({id:i}); memDeck.push({id:i}); }
-    for(let i=memDeck.length-1; i>0; i--){ const j = Math.floor(Math.random()*(i+1)); [memDeck[i], memDeck[j]] = [memDeck[j], memDeck[i]]; }
+    memDeck = [];
+    for(let i=0;i<TYPES_COUNT;i++){ memDeck.push({id:i}); memDeck.push({id:i}); }
+    for(let i=memDeck.length-1; i>0; i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [memDeck[i], memDeck[j]] = [memDeck[j], memDeck[i]];
+    }
   }
   function renderMem(){
     memGrid.innerHTML = '';
-    const ICE_SET = [
-      { img:'ice1.png', emoji:'🍨', name:'プレーン' },
-      { img:'ice2.png', emoji:'🍫', name:'チョコ' },
-      { img:'ice3.png', emoji:'🍵', name:'そのぎ茶' },
-      { img:'ice4.png', emoji:'🔔', name:'ちりんちりんくん' },
-      { img:'ice5.png', emoji:'👨', name:'店長1' },
-      { img:'ice6.png', emoji:'🧑', name:'店長2' }
-    ];
     memDeck.forEach((card, idx)=>{
       const c = document.createElement('div'); c.className = 'memCard'; c.dataset.index = idx;
       const inner = document.createElement('div'); inner.className = 'memInner'; inner.setAttribute('role','button'); inner.setAttribute('aria-label','カードをめくる');
       const front = document.createElement('div'); front.className = 'memFace front';
-      const img = document.createElement('img'); img.src = ICE_SET[card.id].img; img.alt = ICE_SET[card.id].name;
-      const emoji = document.createElement('span'); emoji.textContent = ICE_SET[card.id].emoji; emoji.style.fontSize = 'clamp(32px, 10vw, 56px)';
-      img.addEventListener('load', ()=> { emoji.style.display='none'; }); img.addEventListener('error',()=> { img.style.display='none'; });
+      const img = document.createElement('img'); img.src = ICE_SET[card.id]?.img || ''; img.alt = ICE_SET[card.id]?.name || '';
+      const emoji = document.createElement('span'); emoji.textContent = ICE_SET[card.id]?.emoji || '❄️'; emoji.style.fontSize = 'clamp(32px, 10vw, 56px)';
+      img.addEventListener('load', ()=> { emoji.style.display='none'; });
+      img.addEventListener('error',()=> { img.style.display='none'; });
       front.appendChild(img); front.appendChild(emoji);
       const back = document.createElement('div'); back.className = 'memFace back'; back.textContent = '🍨';
       inner.appendChild(front); inner.appendChild(back); c.appendChild(inner); memGrid.appendChild(c);
@@ -642,7 +624,8 @@
     });
   }
   function flipMem(idx, innerEl){
-    if (memOver || lock) return; if (innerEl.classList.contains('flipped')) return;
+    if (memOver || lock) return;
+    if (innerEl.classList.contains('flipped')) return;
     innerEl.classList.add('flipped');
     if (!first){ first = { idx, id: memDeck[idx].id, el: innerEl }; navigator.vibrate?.(15); return; }
     second = { idx, id: memDeck[idx].id, el: innerEl }; lock = true; moves++; updateMemHud();
@@ -650,7 +633,7 @@
       setTimeout(()=>{
         first.el.classList.add('matched'); second.el.classList.add('matched');
         pairs++; updateMemHud(); first = second = null; lock = false;
-        if (pairs >= TYPES_COUNT){ memOver = true; memResult.style.display = 'block'; memResult.innerHTML = `<strong>🎉 ぜんぶそろった！</strong><div style="margin-top:6px">おめでとう！</div>`; }
+        if (pairs >= TYPES_COUNT){ memOver = true; memResult.style.display='block'; memResult.innerHTML = `<strong>🎉 ぜんぶそろった！</strong><div style="margin-top:6px">おめでとう！</div>`; }
         navigator.vibrate?.([20,40,20]);
       }, 220);
     }else{
@@ -658,22 +641,26 @@
       setTimeout(()=>{
         first.el.classList.remove('flipped'); second.el.classList.remove('flipped');
         first = second = null; lock = false; navigator.vibrate?.(30);
-        if (lives <= 0 && !memOver){ memOver = true; memResult.style.display = 'block'; memResult.innerHTML = `<strong>💥 おしまい！</strong><div style="margin-top:6px">また挑戦してね！</div>`; }
+        if (lives <= 0 && !memOver){
+          memOver = true; memResult.style.display='block';
+          memResult.innerHTML = `<strong>💥 おしまい！</strong><div style="margin-top:6px">また挑戦してね！</div>`;
+        }
       }, 700);
     }
   }
   memRetry.addEventListener('click', ()=> startMemory(TYPES_COUNT));
   memBack.addEventListener('click', showTitle);
 
-  /* =================================================
-     2048（アイス合成パズル）
-     ================================================= */
+  /* =======================
+     2048
+     ======================= */
   function showScoop(){
-    hideAll(); scoopView.style.display='block'; setupScoop();
-    document.getElementById('scPad').style.display = 'block';
+    titleView.style.display='none'; gameView.style.display='none'; memView.style.display='none';
+    duoSelect.style.display='none'; duoMenu.style.display='none'; tttView.style.display='none';
+    scoopView.style.display='block'; setupScoop(); document.getElementById('scPad').style.display='block';
     window.scrollTo({top:0,behavior:'smooth'});
   }
-  document.getElementById('scBack').addEventListener('click', ()=>{ document.getElementById('scPad').style.display = 'none'; showTitle(); });
+  document.getElementById('scBack').addEventListener('click', ()=>{ document.getElementById('scPad').style.display='none'; showTitle(); });
 
   const scGridBg = document.getElementById('scGridBg');
   const scTiles  = document.getElementById('scTiles');
@@ -683,314 +670,238 @@
   const scRetry  = document.getElementById('scRetry');
   const scResult = document.getElementById('scResult');
 
-  const IMAGE_LABEL = { 128:'屋台', 256:'アイス', 512:'店長', 1024:'店長キメポーズ', 2048:'社長' };
-
-  let board = []; let scoreNow = 0; let best = Number(localStorage.getItem('scoop_best') || 0); let prevState = null;
+  const IMAGE_LABEL = {128:'屋台',256:'アイス',512:'店長',1024:'店長キメポーズ',2048:'社長'};
+  let board = [], scoreNow = 0, best = Number(localStorage.getItem('scoop_best')||0), prevState=null;
 
   function setupScoop(){
     if (!scGridBg.childElementCount){ for(let i=0;i<16;i++){ const c=document.createElement('div'); c.className='cell'; scGridBg.appendChild(c); } }
-    best = Number(localStorage.getItem('scoop_best') || 0);
-    scoreNow = 0; board = new Array(16).fill(0); prevState=null;
-    spawn(); spawn(); draw(); scResult.style.display='none';
+    best = Number(localStorage.getItem('scoop_best')||0);
+    scoreNow=0; board=new Array(16).fill(0); prevState=null; spawn(); spawn(); drawScoop(); scResult.style.display='none';
   }
-  function spawn(){ const zeros = board.map((v,i)=>v===0?i:null).filter(v=>v!==null); if (!zeros.length) return false; const pos = zeros[Math.floor(Math.random()*zeros.length)]; board[pos] = Math.random()<0.9 ? 2 : 4; return true; }
-  function canMove(){ if (board.includes(0)) return true; for (let r=0;r<4;r++) for(let c=0;c<4;c++){ const i=r*4+c, v=board[i]; if (c<3 && board[i+1]===v) return true; if (r<3 && board[i+4]===v) return true; } return false; }
-  function lineMove(line){ let arr = line.filter(v=>v!==0); let scoreGain = 0; for(let i=0;i<arr.length-1;i++){ if (arr[i]!==0 && arr[i]===arr[i+1]){ arr[i]*=2; scoreGain += arr[i]; arr[i+1]=0; i++; } } arr = arr.filter(v=>v!==0); while(arr.length<4) arr.push(0); return {line:arr, gain:scoreGain}; }
+  function spawn(){ const zeros=board.map((v,i)=>v===0?i:null).filter(v=>v!==null); if(!zeros.length) return false; const pos=zeros[Math.floor(Math.random()*zeros.length)]; board[pos]=Math.random()<0.9?2:4; return true; }
+  function canMove(){ if (board.includes(0)) return true; for(let r=0;r<4;r++) for(let c=0;c<4;c++){ const i=r*4+c, v=board[i]; if(c<3&&board[i+1]===v) return true; if(r<3&&board[i+4]===v) return true; } return false; }
+  function lineMove(line){ let arr=line.filter(v=>v!==0), gain=0; for(let i=0;i<arr.length-1;i++){ if(arr[i]&&arr[i]===arr[i+1]){ arr[i]*=2; gain+=arr[i]; arr[i+1]=0; i++; } } arr=arr.filter(v=>v!==0); while(arr.length<4) arr.push(0); return {line:arr,gain}; }
   function move(dir){
-    const before = board.slice(); prevState = {board: before.slice(), score: scoreNow}; let totalGain = 0;
-    if (dir==='L' || dir==='R'){
-      for(let r=0;r<4;r++){ let row = board.slice(r*4, r*4+4); if (dir==='R') row.reverse(); const {line,gain} = lineMove(row); totalGain += gain; if (dir==='R') line.reverse(); for(let c=0;c<4;c++) board[r*4+c]=line[c]; }
-    } else {
-      for(let c=0;c<4;c++){ let col = [board[c],board[c+4],board[c+8],board[c+12]]; if (dir==='D') col.reverse(); const {line,gain} = lineMove(col); totalGain += gain; if (dir==='D') line.reverse(); [board[c],board[c+4],board[c+8],board[c+12]] = line; }
-    }
-    if (board.join('') === before.join('')){ prevState = null; return; }
-    scoreNow += totalGain; if (scoreNow>best){ best=scoreNow; localStorage.setItem('scoop_best', String(best)); }
-    spawn(); draw(); checkState();
+    const before=board.slice(); prevState={board:before.slice(),score:scoreNow}; let total=0;
+    if(dir==='L'||dir==='R'){ for(let r=0;r<4;r++){ let row=board.slice(r*4, r*4+4); if(dir==='R') row.reverse(); const {line,gain}=lineMove(row); total+=gain; if(dir==='R') line.reverse(); for(let c=0;c<4;c++) board[r*4+c]=line[c]; } }
+    else { for(let c=0;c<4;c++){ let col=[board[c],board[c+4],board[c+8],board[c+12]]; if(dir==='D') col.reverse(); const {line,gain}=lineMove(col); total+=gain; if(dir==='D') line.reverse(); [board[c],board[c+4],board[c+8],board[c+12]]=line; } }
+    if(board.join('')===before.join('')){ prevState=null; return; }
+    scoreNow+=total; if(scoreNow>best){ best=scoreNow; localStorage.setItem('scoop_best', String(best)); }
+    spawn(); drawScoop(); checkScoop();
   }
-  function checkState(){
-    const maxTile = Math.max(...board);
-    if (maxTile >= 2048){ scResult.style.display='block'; scResult.innerHTML = `<strong>🎉 2048達成！${IMAGE_LABEL[2048] || ''}</strong><div style="margin-top:6px">おめでとう！</div>`; }
-    else{ scResult.style.display='none'; }
-    if (!canMove()){ scResult.style.display='block'; scResult.innerHTML = `<strong>💥 おしまい！</strong><div style="margin-top:6px">スコア ${scoreNow}（ベスト ${best}） また挑戦してね！</div>`; }
+  function checkScoop(){
+    const mx=Math.max(...board);
+    if(mx>=2048){ scResult.style.display='block'; scResult.innerHTML=`<strong>🎉 2048達成！${IMAGE_LABEL[2048]||''}</strong><div style="margin-top:6px">おめでとう！</div>`; }
+    else scResult.style.display='none';
+    if(!canMove()){ scResult.style.display='block'; scResult.innerHTML=`<strong>💥 おしまい！</strong><div style="margin-top:6px">スコア ${scoreNow}（ベスト ${best}） また挑戦してね！</div>`; }
   }
-  function draw(){
-    scTiles.innerHTML = '';
-    for (let i = 0; i < 16; i++){
-      const slot = document.createElement('div'); slot.className = 'slot';
-      const v = board[i];
-      if (v){
-        const t = document.createElement('div'); t.className = `tile t${v}`;
-        if (v >= 128){
-          const img = document.createElement('img'); img.className = 'tileImg'; img.src = `puzzle${v}.png`; img.alt = IMAGE_LABEL[v] || String(v);
-          img.addEventListener('error', ()=>{ img.remove(); t.innerHTML = `<b>${v}</b>`; }); t.appendChild(img);
-        } else { t.innerHTML = `<b>${v}</b>`; }
+  function drawScoop(){
+    scTiles.innerHTML='';
+    for(let i=0;i<16;i++){
+      const slot=document.createElement('div'); slot.className='slot';
+      const v=board[i];
+      if(v){
+        const t=document.createElement('div'); t.className=`tile t${v}`;
+        if(v>=128){
+          const img=document.createElement('img'); img.className='tileImg'; img.src=`puzzle${v}.png`; img.alt=IMAGE_LABEL[v]||String(v);
+          img.addEventListener('error',()=>{img.remove(); t.innerHTML=`<b>${v}</b>`;}); t.appendChild(img);
+        }else{ t.innerHTML=`<b>${v}</b>`; }
         slot.appendChild(t);
       }
       scTiles.appendChild(slot);
     }
-    scScore.textContent = `スコア: ${scoreNow}`; scBest.textContent  = `ベスト: ${best}`;
+    scScore.textContent=`スコア: ${scoreNow}`; scBest.textContent=`ベスト: ${best}`;
   }
-  window.addEventListener('keydown', (e)=>{ if (scoopView.style.display!=='block') return; const k=e.key; if (k==='ArrowLeft') move('L'); else if (k==='ArrowRight') move('R'); else if (k==='ArrowUp') move('U'); else if (k==='ArrowDown') move('D'); });
-  let touchStartX=0, touchStartY=0;
-  scTiles.addEventListener('touchstart', (e)=>{ const t=e.touches[0]; touchStartX=t.clientX; touchStartY=t.clientY; }, {passive:true});
-  scTiles.addEventListener('touchend', (e)=>{ const t=e.changedTouches[0]; const dx=t.clientX-touchStartX, dy=t.clientY-touchStartY; const ax=Math.abs(dx), ay=Math.abs(dy), TH=24; if (ax<TH && ay<TH) return; if (ax>ay) move(dx>0?'R':'L'); else move(dy>0?'D':'U'); }, {passive:true});
-  document.querySelector('#scPad .up')   .addEventListener('click', ()=>move('U'));
-  document.querySelector('#scPad .down') .addEventListener('click', ()=>move('D'));
-  document.querySelector('#scPad .left') .addEventListener('click', ()=>move('L'));
-  document.querySelector('#scPad .right').addEventListener('click', ()=>move('R'));
-  document.getElementById('scUndo').addEventListener('click', ()=>{ if (!prevState) return; board = prevState.board.slice(); scoreNow = prevState.score; prevState=null; draw(); scResult.style.display='none'; });
+  window.addEventListener('keydown', (e)=>{ if(scoopView.style.display!=='block') return; const k=e.key; if(k==='ArrowLeft')move('L'); else if(k==='ArrowRight')move('R'); else if(k==='ArrowUp')move('U'); else if(k==='ArrowDown')move('D'); });
+  let sx=0, sy=0; scTiles.addEventListener('touchstart',(e)=>{const t=e.touches[0]; sx=t.clientX; sy=t.clientY;},{passive:true});
+  scTiles.addEventListener('touchend',(e)=>{const t=e.changedTouches[0]; const dx=t.clientX-sx, dy=t.clientY-sy; const ax=Math.abs(dx), ay=Math.abs(dy), TH=24; if(ax<TH&&ay<TH)return; if(ax>ay)move(dx>0?'R':'L'); else move(dy>0?'D':'U');},{passive:true});
+  document.getElementById('scUndo').addEventListener('click',()=>{ if(!prevState) return; board=prevState.board.slice(); scoreNow=prevState.score; prevState=null; drawScoop(); scResult.style.display='none'; });
   document.getElementById('scRetry').addEventListener('click', setupScoop);
 
-  /* =================================================
-     2人対戦：キャラ定義・セリフ
-     ================================================= */
-  const CHAR = {
-    1:   { id:1,    key:'character1',   name:'店長（夏）', short:'店長' },
-    '1b':{ id:'1b', key:'character1-2', name:'店長（冬）', short:'店長', hidden:true }, // 隠し
-    2:   { id:2,    key:'character2',   name:'店長の奥さん', short:'奥さん' },
-    3:   { id:3,    key:'character3',   name:'バイトA君',  short:'バイト' },
-    4:   { id:4,    key:'character4',   name:'社長',       short:'社長' },
-  };
+  /* =======================
+     2人で遊ぶ：キャラ選択
+     ======================= */
+  const CHAR = [
+    {id:1, key:'boss',  name:'店長',  img:'character1.png', alt:'character1-2.png'}, // ←店長だけ重複OK（2人目はalt画像）
+    {id:2, key:'wife',  name:'奥さん', img:'character2.png'},
+    {id:3, key:'clerk', name:'バイト', img:'character3.png'},
+    {id:4, key:'ceo',   name:'社長',   img:'character4.png'},
+  ];
   const LINES = {
-    default:{ win:'勝った！',                      lose:'負けちゃった…' },
-    manager:{ win:'俺に勝とうなんて100年早い！',   lose:'いやーん！' },
-    wife:   { win:'負けないわよ！',                lose:'今回は譲るわ…' },
-    part:   { win:'やったっす！',                  lose:'マジか…' },
-    ceo:    { win:'私が1番よ！',                   lose:'あんた減給ね…' },
-    mirror: { win:'俺が本物の店長だ！',             lose:'俺に負けた…' },
+    boss : {win:'俺に勝とうなんて100年早い！', lose:'いやーん！'},
+    wife : {win:'負けないわよ！',              lose:'今日はゆるして…'},
+    clerk: {win:'やったっす！',                lose:'マジか…'},
+    ceo  : {win:'私が1番よ！',                 lose:'あんた減給ね…'},
   };
-  function keyFromId(id){
-    if (id===1 || id==='1') return 'manager';
-    if (id==='1b') return 'manager';
-    if (id===2) return 'wife';
-    if (id===3) return 'part';
-    if (id===4) return 'ceo';
-    return 'default';
-  }
+  const BOSS_SPECIAL = {intro:'俺が2人！？', win:'俺が本物の店長だ！', lose:'俺に負けた…'};
 
-  /* =================================================
-     2人対戦：キャラ選択 → ゲーム選択
-     ================================================= */
-  let VS = { p1:null, p2:null };
-  document.getElementById('vsBackTitle').addEventListener('click', showTitle);
-  document.getElementById('vsGoGames').addEventListener('click', ()=>{ document.getElementById('vsStepPick').style.display='none'; document.getElementById('vsStepGames').style.display='block'; });
-  document.getElementById('vsRePick').addEventListener('click', ()=>{ document.getElementById('vsStepPick').style.display='block'; document.getElementById('vsStepGames').style.display='none'; });
-  function showVs(){
-    hideAll(); vsView.style.display='block';
-    document.getElementById('vsStepPick').style.display='block';
-    document.getElementById('vsStepGames').style.display='none';
-    VS = {p1:null,p2:null}; renderPickGrid('pick1','p1'); renderPickGrid('pick2','p2');
-    document.getElementById('vsGoGames').disabled = true; document.getElementById('vsHint').style.display='none';
+  let selStep=1;           // 1= P1選択中, 2= P2選択中
+  let P1=null, P2=null;    // {id,key,name,img}
+
+  const charGrid = document.getElementById('charGrid');
+  const selectWho= document.getElementById('selectWho');
+  const toDuoMenu= document.getElementById('toDuoMenu');
+  const selBack  = document.getElementById('selBack');
+
+  function showDuoSelect(){
+    titleView.style.display='none'; gameView.style.display='none'; memView.style.display='none';
+    scoopView.style.display='none'; duoMenu.style.display='none'; tttView.style.display='none';
+    duoSelect.style.display='block';
+    selStep=1; P1=null; P2=null; toDuoMenu.disabled=true;
+    renderCharGrid();
+    selectWho.innerHTML='プレイヤー1のキャラを選んでね（同じキャラは<em>店長だけOK</em>）';
     window.scrollTo({top:0,behavior:'smooth'});
   }
-  function renderPickGrid(elId, side){
-    const host = document.getElementById(elId); host.innerHTML='';
-    [1,2,3,4].forEach(id=>{
-      const btn = document.createElement('button');
-      const img = document.createElement('img'); img.src = `${CHAR[id].key}.png`; img.alt = CHAR[id].name;
-      img.addEventListener('error', ()=>{ img.style.display='none'; btn.style.padding='16px'; btn.textContent = CHAR[id].short; });
-      const label = document.createElement('span'); label.textContent = CHAR[id].name;
-      btn.appendChild(img); btn.appendChild(label);
-      btn.addEventListener('click', ()=>{
-        host.querySelectorAll('button').forEach(b=>b.classList.remove('selected'));
-        btn.classList.add('selected'); VS[side] = id;
-        if (VS.p1===1 && VS.p2===1){ VS.p2='1b'; document.getElementById('vsHint').style.display='block'; }
-        else{ document.getElementById('vsHint').style.display='none'; }
-        document.getElementById('vsGoGames').disabled = !(VS.p1 && VS.p2);
+  selBack.addEventListener('click', showTitle);
+
+  function renderCharGrid(){
+    charGrid.innerHTML='';
+    CHAR.forEach(ch=>{
+      const card=document.createElement('div'); card.className='charCard'; card.dataset.id=ch.id;
+      const img=document.createElement('img'); img.src=ch.img; img.alt=ch.name;
+      const label=document.createElement('div'); label.className='charLabel'; label.textContent=ch.name;
+      card.appendChild(img); card.appendChild(label); charGrid.appendChild(card);
+
+      card.addEventListener('click',()=>{
+        // 店長以外は重複禁止
+        if(selStep===2 && P1 && P1.key!== 'boss' && ch.id===P1.id){
+          selectWho.innerHTML='同じキャラは <strong>店長だけ</strong> 選べるよ！';
+          selectWho.style.color='#b00020';
+          setTimeout(()=>{selectWho.style.color=''; selectWho.innerHTML='プレイヤー2のキャラを選んでね';},1200);
+          return;
+        }
+        // 選択反映
+        if(selStep===1){
+          P1={...ch};
+          // UIマーク
+          [...charGrid.children].forEach(c=>{c.classList.remove('selectedP1'); c.removeAttribute('data-select-label');});
+          card.classList.add('selectedP1'); card.setAttribute('data-select-label','P1');
+          selStep=2; selectWho.textContent='プレイヤー2のキャラを選んでね';
+        }else{
+          // 店長×店長なら2人目だけ alt 画像へ
+          P2={...ch};
+          if(P1.key==='boss' && P2.key==='boss' && CHAR[0].alt){ P2.img = CHAR[0].alt; }
+          [...charGrid.children].forEach(c=>{c.classList.remove('selectedP2');});
+          card.classList.add('selectedP2'); card.setAttribute('data-select-label','P2');
+          toDuoMenu.disabled=false;
+        }
       });
-      host.appendChild(btn);
     });
   }
-  function setVsBar(p1ImgId, p1NameId, p2ImgId, p2NameId){
-    const p1 = VS.p1, p2 = VS.p2;
-    const p1Img = document.getElementById(p1ImgId), p2Img = document.getElementById(p2ImgId);
-    const p1Name= document.getElementById(p1NameId), p2Name= document.getElementById(p2NameId);
-    if (p1Img){ p1Img.src = `${CHAR[p1].key}.png`; p1Img.alt = CHAR[p1].name; p1Img.addEventListener('error',()=>{ p1Img.style.display='none'; }); }
-    if (p2Img){ p2Img.src = `${CHAR[p2].key}.png`; p2Img.alt = CHAR[p2].name; p2Img.addEventListener('error',()=>{ p2Img.style.display='none'; }); }
-    if (p1Name) p1Name.textContent = CHAR[p1].short;
-    if (p2Name) p2Name.textContent = CHAR[p2].short;
-  }
 
-  /* =================================================
-     VS：〇✕ゲーム
-     ================================================= */
-  document.getElementById('vsPlayTTT').addEventListener('click', startTTT);
-  document.getElementById('tttToMenu').addEventListener('click', ()=>{ tttView.style.display='none'; vsView.style.display='block'; });
-  document.getElementById('tttToTitle').addEventListener('click', showTitle);
-  document.getElementById('tttAgain').addEventListener('click', startTTT);
+  document.getElementById('toDuoMenu').addEventListener('click', ()=>{
+    duoSelect.style.display='none'; duoMenu.style.display='block';
+  });
+  document.getElementById('duoBackToSelect').addEventListener('click', showDuoSelect);
+  document.getElementById('duoBackToTitle').addEventListener('click', showTitle);
+
+  /* =======================
+     ◯✖（マルバツ）
+     ======================= */
+  const tttBoardEl = document.getElementById('tttBoard');
+  const tttBubble  = document.getElementById('tttBubble');
+  const p1Card = document.getElementById('p1Card'), p2Card = document.getElementById('p2Card');
+  const p1Icon = document.getElementById('p1Icon'), p2Icon = document.getElementById('p2Icon');
+  const p1Name = document.getElementById('p1Name'), p2Name = document.getElementById('p2Name');
+  const p1Line = document.getElementById('p1Line'), p2Line = document.getElementById('p2Line');
+  const turnLabel = document.getElementById('turnLabel');
+  const tttRetry = document.getElementById('tttRetry');
+  const tttToMenu= document.getElementById('tttToMenu');
+  const tttBack  = document.getElementById('tttBack');
+
+  document.getElementById('playTTT').addEventListener('click', startTTT);
+  tttRetry.addEventListener('click', startTTT);
+  tttToMenu.addEventListener('click', ()=>{ tttView.style.display='none'; duoMenu.style.display='block'; });
+  tttBack.addEventListener('click', showTitle);
+
+  let board3=[], turn='O', finished=false; // O= P1, X= P2
 
   function startTTT(){
-    vsView.style.display='none'; tttView.style.display='block';
-    setVsBar('tttP1Img','tttP1Name','tttP2Img','tttP2Name');
-    document.getElementById('tttResult').style.display='none';
-    const boardEl = document.getElementById('tttBoard'); boardEl.innerHTML='';
-    let turn = 1; let board = Array(9).fill(0); updateTurn();
+    duoMenu.style.display='none'; tttView.style.display='block'; window.scrollTo({top:0,behavior:'smooth'});
+
+    // HUD 初期化（アイコン大きめ＆ターン中は赤枠）
+    p1Icon.src = P1?.img || ''; p2Icon.src = P2?.img || '';
+    p1Name.textContent = P1?.name || 'P1'; p2Name.textContent = P2?.name || 'P2';
+    p1Line.textContent=''; p2Line.textContent='';
+    turn='O'; finished=false; setTurnHud();
+
+    // 盤面生成
+    board3 = Array(9).fill('');
+    tttBoardEl.innerHTML='';
     for(let i=0;i<9;i++){
-      const cell=document.createElement('div'); cell.className='tttCell';
-      cell.addEventListener('click', ()=>{
-        if (board[i]!==0) return;
-        if (document.getElementById('tttResult').style.display==='block') return;
-        board[i] = turn; cell.textContent = (turn===1?'◯':'✕');
-        const w = tttWinner(board);
-        if (w){ showResult(w); }else if (!board.includes(0)){ showResult(0); }else{ turn = 3 - turn; updateTurn(); }
-      });
-      boardEl.appendChild(cell);
+      const c=document.createElement('div'); c.className='cell'; c.dataset.i=i; c.textContent='';
+      c.addEventListener('click', ()=> clickCell(i, c));
+      tttBoardEl.appendChild(c);
     }
-    function updateTurn(){ document.getElementById('tttTurn').textContent = (turn===1?'P1':'P2')+'のターン'; }
-    function showResult(w){
-      const r=document.getElementById('tttResult'); r.style.display='block';
-      if (w===0){ r.innerHTML = '<strong>引き分け！</strong>'; return; }
-      const winner = (w===1?VS.p1:VS.p2), loser = (w===1?VS.p2:VS.p1);
-      const mirror = ((winner===1||winner==='1b') && (loser===1||loser==='1b'));
-      const winLine  = mirror ? LINES.mirror.win  : LINES[keyFromId(winner)].win;
-      const loseLine = mirror ? LINES.mirror.lose : LINES[keyFromId(loser)].lose;
-      r.innerHTML = `<strong>🎉 ${w===1?'P1':'P2'}の勝ち！</strong><div style="margin-top:6px">${winLine}<br>${loseLine}</div>`;
+
+    // 店長×店長なら開始時にセリフ
+    if(P1?.key==='boss' && P2?.key==='boss'){
+      tttBubble.innerHTML = BOSS_SPECIAL.intro;
+      tttBubble.style.display='block';
+      setTimeout(()=> tttBubble.style.display='none', 1200);
     }
-  }
-  function tttWinner(b){
-    const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-    for(const [a,c,d] of lines){ if(b[a]&&b[a]===b[c]&&b[a]===b[d]) return b[a]; }
-    return 0;
+    tttRetry.style.display='none'; tttToMenu.style.display='none';
   }
 
-  /* =================================================
-     VS：神経衰弱（7種類）
-     ================================================= */
-  document.getElementById('vsPlayMem').addEventListener('click', startMem2);
-  document.getElementById('mem2ToMenu').addEventListener('click', ()=>{ mem2View.style.display='none'; vsView.style.display='block'; });
-  document.getElementById('mem2ToTitle').addEventListener('click', showTitle);
-  document.getElementById('mem2Again').addEventListener('click', startMem2);
-
-  function startMem2(){
-    vsView.style.display='none'; mem2View.style.display='block';
-    setVsBar('mem2P1Img','mem2P1Name','mem2P2Img','mem2P2Name');
-    document.getElementById('mem2Score1').textContent='0';
-    document.getElementById('mem2Score2').textContent='0';
-    document.getElementById('mem2Result').style.display='none';
-    const grid = document.getElementById('mem2Grid'); grid.innerHTML='';
-    const kinds = 7; let deck=[]; for(let i=0;i<kinds;i++){ deck.push(i); deck.push(i); }
-    for(let i=deck.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
-    let turn=1, first=null, second=null, lock=false, score=[0,0]; updateTurn();
-    deck.forEach((id, idx)=>{
-      const outer = document.createElement('div'); outer.className='memCard';
-      const inner = document.createElement('div'); inner.className='memInner'; inner.setAttribute('role','button');
-      const front = document.createElement('div'); front.className='memFace front';
-      const back  = document.createElement('div'); back.className='memFace back'; back.textContent='🍨';
-      const img   = document.createElement('img'); img.src=`ice${id+1}.png`; img.alt=`ice${id+1}`;
-      const span  = document.createElement('span'); span.textContent='🍦'; span.style.fontSize='clamp(32px,10vw,56px)';
-      img.addEventListener('load', ()=>{ span.style.display='none'; }); img.addEventListener('error',()=>{ img.style.display='none'; });
-      front.appendChild(img); front.appendChild(span); inner.appendChild(front); inner.appendChild(back); outer.appendChild(inner); grid.appendChild(outer);
-      outer.addEventListener('click', ()=>{
-        if (lock || inner.classList.contains('flipped')) return;
-        inner.classList.add('flipped');
-        if (!first){ first={idx,id,el:inner}; return; }
-        second={idx,id,el:inner}; lock=true;
-        if (first.id===second.id){
-          setTimeout(()=>{
-            first.el.classList.add('matched'); second.el.classList.add('matched');
-            score[turn-1]++; document.getElementById(turn===1?'mem2Score1':'mem2Score2').textContent=String(score[turn-1]);
-            first=second=null; lock=false;
-            if (score[0]+score[1]===kinds){
-              const r=document.getElementById('mem2Result'); r.style.display='block';
-              const w = score[0]===score[1]?0 : (score[0]>score[1]?1:2);
-              r.innerHTML = w===0 ? '<strong>引き分け！</strong>' : `<strong>🎉 P${w}の勝ち！</strong>`;
-            }
-          }, 220);
-        }else{
-          setTimeout(()=>{
-            first.el.classList.remove('flipped'); second.el.classList.remove('flipped');
-            first=second=null; lock=false; turn=3-turn; updateTurn();
-          }, 650);
-        }
-      });
-    });
-    function updateTurn(){ document.getElementById('mem2Turn').textContent = (turn===1?'P1':'P2')+'のターン'; }
+  function setTurnHud(){
+    p1Card.classList.toggle('active', turn==='O');
+    p2Card.classList.toggle('active', turn==='X');
+    turnLabel.textContent = turn==='O' ? 'P1のターン' : 'P2のターン';
   }
 
-  /* =================================================
-     VS：四目並べ（7×6）
-     ================================================= */
-  document.getElementById('vsPlayC4').addEventListener('click', startC4);
-  document.getElementById('c4ToMenu').addEventListener('click', ()=>{ c4View.style.display='none'; vsView.style.display='block'; });
-  document.getElementById('c4ToTitle').addEventListener('click', showTitle);
-  document.getElementById('c4Again').addEventListener('click', startC4);
+  function clickCell(i, el){
+    if(finished || board3[i]) return;
+    board3[i] = turn;
+    el.textContent = turn==='O' ? '○' : '✕';
+    el.classList.add('disabled');
 
-  function startC4(){
-    vsView.style.display='none'; c4View.style.display='block';
-    setVsBar('c4P1Img','c4P1Name','c4P2Img','c4P2Name');
-    document.getElementById('c4Result').style.display='none';
-    const W=7, H=6;
-    const boardEl = document.getElementById('c4Board'); boardEl.innerHTML='';
-    let grid=[...Array(H)].map(()=>Array(W).fill(0));
-    let turn=1, over=false;
-    updateTurn();
-
-    // 盤面セルを並べる
-    const cells=[];
-    for(let r=0;r<H;r++){
-      for(let c=0;c<W;c++){
-        const cell=document.createElement('div'); cell.className='c4Cell'; cell.dataset.r=r; cell.dataset.c=c;
-        cells.push(cell); boardEl.appendChild(cell);
-      }
-    }
-
-    // クリックでコインを落とす
-    boardEl.addEventListener('click', (e)=>{
-      if (over) return;
-      const target = e.target.closest('.c4Cell'); if (!target) return;
-      const c = Number(target.dataset.c);
-
-      // 下から空きを探す
-      let r=H-1; while(r>=0 && grid[r][c]!==0) r--;
-      if (r<0) return; // その列は満杯
-
-      grid[r][c] = turn; renderDiscs();
-
-      const w = c4Winner(grid);
-      if (w){
-        over = true;
-        const winner = (w===1?VS.p1:VS.p2), loser = (w===1?VS.p2:VS.p1);
-        const mirror = ((winner===1||winner==='1b') && (loser===1||loser==='1b'));
-        const winLine  = mirror ? LINES.mirror.win  : LINES[keyFromId(winner)].win;
-        const loseLine = mirror ? LINES.mirror.lose : LINES[keyFromId(loser)].lose;
-        const rEl = document.getElementById('c4Result');
-        rEl.style.display='block';
-        rEl.innerHTML = `<strong>🎉 ${w===1?'P1':'P2'}の勝ち！</strong><div style="margin-top:6px">${winLine}<br>${loseLine}</div>`;
-        return;
-      }
-      if (c4Full(grid)){ over=true; const rEl=document.getElementById('c4Result'); rEl.style.display='block'; rEl.innerHTML='<strong>引き分け！</strong>'; return; }
-
-      // ターン交代
-      turn = 3 - turn; updateTurn();
-    });
-
-    function renderDiscs(){
-      cells.forEach((cell)=>{
-        cell.innerHTML=''; const r=Number(cell.dataset.r), c=Number(cell.dataset.c);
-        const v = grid[r][c]; if (!v) return;
-        const d = document.createElement('div'); d.className = `disc p${v}`; cell.appendChild(d);
-      });
-    }
-    function updateTurn(){ document.getElementById('c4Turn').textContent = (turn===1?'P1':'P2')+'のターン'; }
+    const res = judgeTTT();
+    if(res){ endTTT(res); return; }
+    // 入れ替え
+    turn = (turn==='O') ? 'X' : 'O';
+    setTurnHud();
   }
 
-  function c4Full(g){ for(let r=0;r<g.length;r++) for(let c=0;c<g[0].length;c++) if(g[r][c]===0) return false; return true; }
-  function c4Winner(g){
-    const H=g.length, W=g[0].length;
-    const dirs=[[0,1],[1,0],[1,1],[1,-1]]; // 横・縦・斜め2方向
-    for(let r=0;r<H;r++){
-      for(let c=0;c<W;c++){
-        const v=g[r][c]; if (!v) continue;
-        for(const [dr,dc] of dirs){
-          let ok=true;
-          for(let k=1;k<4;k++){
-            const nr=r+dr*k, nc=c+dc*k; if(nr<0||nr>=H||nc<0||nc>=W||g[nr][nc]!==v){ ok=false; break; }
-          }
-          if (ok) return v; // 4連
-        }
-      }
+  function judgeTTT(){
+    const L=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    for(const [a,b,c] of L){
+      if(board3[a] && board3[a]===board3[b] && board3[b]===board3[c]) return board3[a]; // 'O' or 'X'
     }
-    return 0;
+    if(board3.every(v=>v)) return 'D'; // draw
+    return '';
+  }
+
+  function endTTT(result){
+    finished=true;
+    // 盤面クリック無効化
+    [...tttBoardEl.children].forEach(c=>c.classList.add('disabled'));
+
+    let winnerText='';
+    if(result==='O'){ winnerText='🎉 P1の勝ち！'; setLines('P1'); }
+    else if(result==='X'){ winnerText='🎉 P2の勝ち！'; setLines('P2'); }
+    else { winnerText='引き分け！'; p1Line.textContent='やるね！'; p2Line.textContent='次はいける！'; }
+
+    tttBubble.innerHTML = `<strong>${winnerText}</strong>`;
+    tttBubble.style.display='block';
+    tttRetry.style.display='inline-block';
+    tttToMenu.style.display='inline-block';
+  }
+
+  // 勝敗セリフを各アイコン下に表示（店長×店長は特別セリフ）
+  function setLines(whoWin){
+    const P1key=P1.key, P2key=P2.key;
+    if(P1key==='boss' && P2key==='boss'){
+      if(whoWin==='P1'){ p1Line.textContent=BOSS_SPECIAL.win;  p2Line.textContent=BOSS_SPECIAL.lose; }
+      else             { p1Line.textContent=BOSS_SPECIAL.lose; p2Line.textContent=BOSS_SPECIAL.win;  }
+      return;
+    }
+    if(whoWin==='P1'){
+      p1Line.textContent = (LINES[P1key]?.win)||'やった！';
+      p2Line.textContent = (LINES[P2key]?.lose)||'くやしい…';
+    }else{
+      p1Line.textContent = (LINES[P1key]?.lose)||'くやしい…';
+      p2Line.textContent = (LINES[P2key]?.win)||'やった！';
+    }
   }
 </script>
 </body>
