@@ -3,642 +3,712 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>めちゃつよボリューミー店長のミニゲームパーク</title>
+<title>めちゃつよボリューミー店長とのジャンケン対決</title>
 
 <style>
 :root{
   --bg:#97d2e4; --ink:#0c2a33; --muted:#215b6b; --white:#fff;
-  --pill:#e6f7fd; --btn:#10aee3; --btn-ink:#fff; --card:#ffffffef;
-  --win:#0da66e; --lose:#d94848;
+  --pill:#e6f7fd; --btn:#10aee3; --btn-ink:#fff;
+  --card:#ffffffef; --win:#0da66e; --lose:#d94848; --accent:#ff9e2c;
+  --ring:#ff5a5a;
 }
-*{box-sizing:border-box}
-html,body{height:100%}
+*{box-sizing:border-box} html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);
   font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans JP",sans-serif}
 .wrap{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
-.container{width:min(920px,92vw);margin:0 auto;padding:16px 0 26px}
+.container{width:min(920px,94vw);margin:0 auto;padding:16px 0 24px}
 
-/* 共通 */
-h1{margin:8px 0 4px;font-size:clamp(22px,5.8vw,36px);letter-spacing:.06em;text-align:center}
+/* 見出しなど */
+h1{margin:8px 0 6px;font-size:clamp(22px,5.8vw,36px);letter-spacing:.06em;text-align:center}
 .sub{margin:0 0 10px;color:var(--muted);text-align:center;font-size:clamp(12px,3.4vw,15px)}
-.score{margin:12px 0 6px;text-align:center;font-weight:800;font-size:clamp(22px,7.2vw,34px)}
-.message{margin:8px 0 18px;text-align:center;font-size:clamp(14px,4.2vw,18px)}
 .pill{display:inline-block;padding:.45em 1em;border-radius:999px;background:var(--pill);
-  font-weight:700;color:#222;font-size:clamp(12px,3.8vw,16px)}
-.btnrow{display:flex;gap:14px;justify-content:center;align-items:center;margin:10px 0 0;position:relative;z-index:5;flex-wrap:wrap}
-.btn{appearance:none;border:none;border-radius:14px;cursor:pointer;font-weight:800;letter-spacing:.06em}
+  font-weight:800;color:#1b3a46;font-size:clamp(12px,3.6vw,16px)}
+.btnrow{display:flex;gap:14px;justify-content:center;align-items:center;margin:10px 0 0;flex-wrap:wrap}
+.btn{appearance:none;border:none;border-radius:14px;cursor:pointer;font-weight:900;letter-spacing:.06em}
 .btn.primary{background:var(--btn);color:var(--btn-ink);padding:14px 22px;font-size:clamp(14px,4.8vw,18px)}
-.btn.ghost{background:transparent;color:#083b48;border:2px solid #083b4840;
-  padding:12px 20px;border-radius:16px;font-size:clamp(14px,4.8vw,18px)}
-.resultCard{display:none;margin:12px auto 0;max-width:780px;background:var(--card);
-  border-radius:16px;padding:12px 14px;text-align:center;font-size:clamp(14px,4.4vw,18px);box-shadow:0 12px 28px #07495926}
-.win{color:var(--win);font-weight:800}.lose{color:var(--lose);font-weight:800}
+.btn.ghost{background:transparent;color:#083b48;border:2px solid #083b4840;padding:12px 20px;border-radius:16px;font-size:clamp(14px,4.8vw,18px)}
+.btn.white{background:#fff;color:#073845;border:2px solid #00000010}
+.btn.orange{background:var(--accent);color:#fff;border:2px solid #0000}
 
-/* ========== タイトル ========== */
+/* ===== タイトル ===== */
 #title{display:grid;place-items:center}
-#title .hero{
-  width:100%;display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:8px;
-  background:url('bg-title.png') center/cover no-repeat; border-radius:24px; padding:16px 12px 26px;
+.title-hero{
+  width:100%;position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:0;
+  background:url("bg-title.png") center/cover no-repeat;border-radius:26px;overflow:hidden;
 }
-#title h2{margin:0;text-align:center;line-height:1.25;font-size:clamp(22px,6.2vw,34px)}
-.title-illus{width:min(620px,92vw);max-height:62svh;object-fit:contain;object-position:center bottom;
-  display:block;margin:8px auto 2px;pointer-events:none}
-.speech{display:none;margin:2px auto 0;padding:.6em 1em;border-radius:12px;background:#fff;
-  box-shadow:0 8px 24px rgba(0,0,0,.12);font-weight:800;text-align:center}
+.title-illus{width:min(640px,96%);max-height:66svh;object-fit:contain;object-position:center bottom;display:block;margin:0 auto;filter:drop-shadow(0 12px 32px #00000012);transform:scale(.96)} /* ← 店長を少し小さく */
+#speech{display:none;margin:6px auto 10px;padding:.6em 1em;border-radius:12px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.12);font-weight:800}
 
-/* ========== じゃんけん ========== */
-#game{display:none}
-.topRow{margin-top:4px;display:flex;align-items:flex-start;justify-content:space-between;gap:clamp(10px,4vw,18px)}
-.frameBox{position:relative;flex:0 0 auto;width:clamp(160px,40vw,320px);aspect-ratio:3/4;background:url("frame2.png") center/contain no-repeat;}
-.bossHandImg{position:absolute;left:8%;top:6%;width:84%;height:88%;object-fit:contain;filter:drop-shadow(0 10px 16px #00000018)}
-.bossPic{flex:0 0 auto;width:clamp(200px,42vw,360px);height:auto;object-fit:contain;filter:drop-shadow(0 10px 20px rgba(0,0,0,.12))}
-.hands{margin:16px auto 0;display:flex;justify-content:center;gap:clamp(12px,4vw,18px)}
-.handBtn{width:clamp(92px,22vw,136px);aspect-ratio:1/1;border-radius:18px;background:var(--white);
-  box-shadow:0 10px 30px #075a6a22;display:grid;place-items:center;font-size:clamp(34px,10vw,52px);cursor:pointer;border:none}
-.restartRow{display:none;justify-content:center;margin:14px 0 0}
-
-/* ========== 神経衰弱(1人) ========== */
-#memory{display:none}
-.memDiff{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin: 6px 0 6px; }
-.memHud{ display:flex; gap:14px; justify-content:center; align-items:center; margin: 10px 0 10px; font-weight:700; flex-wrap:wrap; }
-.memGrid{ --gap: clamp(10px, 3.4vw, 14px); display:grid; gap: var(--gap); grid-template-columns: repeat(4, 1fr); width:min(740px, 92vw); margin: 0 auto; }
-.memCard{ aspect-ratio: 1 / 1; perspective: 1000px; position:relative; }
-.memInner{ position:absolute; inset:0; transition: transform .42s ease; transform-style: preserve-3d; transform: rotateY(180deg);}
-.memInner.flipped{ transform: rotateY(0deg); }
-.memFace{ position:absolute; inset:0; border-radius:16px; overflow:hidden; backface-visibility:hidden; box-shadow:0 10px 24px rgba(0,0,0,.12); display:grid; place-items:center; }
-.memFace.front{ background:#fff; transform: rotateY(0deg); }
-.memFace.back{ background: linear-gradient(135deg, #c9f0ff, #97d2e4); color:#084357; font-size: clamp(22px, 6.4vw, 28px); transform: rotateY(180deg); }
-.memFace.front img{ width: 78%; height: 78%; object-fit: contain; pointer-events:none; }
-.memInner.matched{ animation: pop .36s ease; }
-@keyframes pop{ 0%{ transform: rotateY(0deg) scale(1)} 50%{ transform: rotateY(0deg) scale(1.06)} 100%{ transform: rotateY(0deg) scale(1)} }
-.lives{ display:flex; gap:6px; align-items:center; font-size:clamp(18px,5.4vw,22px) }
-.lives .heart{ transition: .2s ease; }
-.lives .heart.lost{ opacity:.3; filter:grayscale(1); transform:scale(.92); }
-
-/* ========== 2048 ========== */
-#scoop{display:none}
+/* ===== 2048（見た目のみ） ===== */
 .scoopHud{display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap;font-weight:800;margin:8px 0}
 .scoopHud span{background:#ffffffcc;padding:8px 12px;border-radius:10px;box-shadow:0 6px 16px #00000012}
 .scoopBtns{display:flex;gap:10px}
 .scoopBoard{width:min(520px,92vw);margin:12px auto 0;position:relative}
-.scGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;background:#bde3ef;padding:10px;border-radius:14px;}
+.scGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;background:#bde3ef;padding:10px;border-radius:14px}
 .scGrid .cell{aspect-ratio:1/1;border-radius:10px;background:#e6f7fd}
 .scTiles{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px}
 .scTiles>.slot{aspect-ratio:1/1}
-.tile{width:100%;height:100%;border-radius:12px;display:grid;place-items:center;font-weight:900;text-align:center;line-height:1.1;box-shadow:0 10px 24px rgba(0,0,0,.12);user-select:none;animation:tileIn .18s ease;color:#083b48;font-size:clamp(12px,3.6vw,15px)}
+.tile{width:100%;height:100%;border-radius:12px;display:grid;place-items:center;font-weight:900;text-align:center;line-height:1.1;
+  box-shadow:0 10px 24px rgba(0,0,0,.12);user-select:none;animation:tileIn .18s ease;color:#083b48;font-size:clamp(12px,3.6vw,15px)}
 .tile b{display:block;font-size:clamp(18px,6vw,26px)}
 @keyframes tileIn{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
 .tile.merge{animation:mergePop .22s ease}
 @keyframes mergePop{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
-.t2{background:#fffdf5}.t4{background:#fff6da}
-.t8{background:#ffe1e9}.t16{background:#f6d7c7}
-.t32{background:#d8f0dc}.t64{background:#d7f0fb}
-.t128{background:#ffe9c2}.t256{background:#f7d9ff}
+.t2{background:#fffdf5}.t4{background:#fff6da}.t8{background:#ffe1e9}.t16{background:#f6d7c7}
+.t32{background:#d8f0dc}.t64{background:#d7f0fb}.t128{background:#ffe9c2}.t256{background:#f7d9ff}
 .t512{background:#d9fff1}.t1024{background:#fff0c5}.t2048{background:#ffe7e7}
 .tileImg{width:86%;height:86%;object-fit:contain;pointer-events:none}
-#scPad{position:sticky;bottom:env(safe-area-inset-bottom,12px);display:none;margin-top:16px}
+#scPad{position:sticky;bottom:env(safe-area-inset-bottom, 12px);display:none;margin-top:16px}
 .pad{width:180px;height:160px;margin:0 auto;position:relative;display:grid;place-items:center}
 .pad button{position:absolute;width:56px;height:56px;border-radius:50%;border:none;background:#ffffffd8;box-shadow:0 8px 18px #00000018;font-size:22px;font-weight:900;color:#0c2a33;cursor:pointer}
-.pad .up{top:0;left:50%;transform:translate(-50%,0)}
-.pad .down{bottom:0;left:50%;transform:translate(-50%,0)}
-.pad .left{left:0;top:50%;transform:translate(0,-50%)}
-.pad .right{right:0;top:50%;transform:translate(0,-50%)}
+.pad .up{top:0;left:50%;transform:translate(-50%,0)} .pad .down{bottom:0;left:50%;transform:translate(-50%,0)}
+.pad .left{left:0;top:50%;transform:translate(0,-50%)} .pad .right{right:0;top:50%;transform:translate(0,-50%)}
 
-/* ========== 2人プレイ(選択) ========== */
-#versus{display:none}
-.roster{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:14px;width:min(860px,92vw);margin:8px auto 0}
-.charCard{background:#fff;border-radius:16px;box-shadow:0 8px 18px #00000018;cursor:pointer;padding:10px;text-align:center;transition:.15s}
-.charCard:hover{transform:translateY(-2px)}
-.charCard img{width:100%;height:auto;border-radius:12px;display:block}
-.charName{margin-top:6px;font-weight:800;letter-spacing:.02em}
-.charCard.disabled{opacity:.45;pointer-events:none}
+/* ===== 2人プレイ共通UI（上部の顔バッジ＋ターン） ===== */
+.duoHud{display:flex;gap:10px;justify-content:space-between;align-items:center;margin:8px auto 10px;max-width:min(820px,94vw)}
+.pBadge{display:flex;align-items:center;gap:8px;background:#fff;border-radius:999px;padding:8px 14px;box-shadow:0 8px 20px #00000014;font-weight:800}
+.pBadge img{width:34px;height:34px;border-radius:50%;object-fit:cover;border:3px solid transparent}
+.pBadge.turn img{border-color:var(--ring)}
+.turnTag{background:#ffffffd0;border:2px solid #0000;border-radius:999px;padding:8px 16px;font-weight:900}
 
-/* ========== ◯✕ゲーム ========== */
-#tic{display:none}
-.ticHud{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;font-weight:800;margin:8px 0}
-.playerBadge{display:flex;align-items:center;gap:8px;background:#fff;border-radius:999px;padding:6px 12px;box-shadow:0 6px 16px #00000018}
-.badgePic{width:34px;height:34px;border-radius:50%;object-fit:cover}
-.turnRing{outline:3px solid #ff4d4f;outline-offset:3px;border-radius:999px}
-.ticBoard{width:min(520px,92vw);margin:10px auto 0;padding:12px;border-radius:18px;background:url('stage33.png') center/cover no-repeat, #bde3ef;box-shadow:inset 0 0 0 8px #6ec0e3}
-.ticGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.ticCell{aspect-ratio:1/1;border-radius:14px;background:#e6f7fd;display:grid;place-items:center;cursor:pointer;font-size:clamp(26px,9vw,42px);color:#063442;font-weight:900}
-.ticCell.mark{background:#fff}
-.ticSay{font-size:12px;color:#0b4150}
+/* ===== ○×（TicTacToe） ===== */
+#ttt{display:none}
+.tttBoard{width:min(620px,92vw);margin:10px auto 0;position:relative;border-radius:18px;overflow:hidden}
+.tttBoard::before{content:"";position:absolute;inset:0;background:url("stage33.png") center/cover no-repeat;opacity:.25;pointer-events:none}
+.tttGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;background:#7fc3da;padding:10px;border-radius:18px}
+.tttCell{aspect-ratio:1/1;border-radius:14px;background:#e6f7fd;display:grid;place-items:center;cursor:pointer;box-shadow:inset 0 0 0 2px #ffffff70}
+.tttCell span{font-size:clamp(34px,14vw,58px);font-weight:900;letter-spacing:.02em} /* フォント修正：日本語の「○」「×」 */
+.tttCell.disabled{pointer-events:none;opacity:.8}
+.resultCard{display:none;margin:12px auto 0;max-width:720px;background:var(--card);border-radius:16px;padding:12px 14px;text-align:center;font-size:clamp(14px,4.4vw,18px);box-shadow:0 12px 28px #07495926}
 
-/* ========== 四目並べ(コイン落とし) ========== */
+/* ===== 四目並べ（Connect4） ===== */
 #c4{display:none}
-.c4Hud{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;font-weight:800;margin:8px 0}
-.c4BoardWrap{width:min(720px,92vw);margin:10px auto 0;border-radius:18px;background:url('stage76.png') center/cover no-repeat, #bde3ef;box-shadow:inset 0 0 0 10px #2aa1e0}
-.c4Grid{--cols:7;--rows:6;display:grid;grid-template-columns:repeat(7,1fr);gap:10px;padding:10px}
-.c4Cell{aspect-ratio:1/1;border-radius:50%;background:#eaf7ff;position:relative;overflow:visible}
-.chip{position:absolute;inset:8%;border-radius:50%;display:block;object-fit:contain;animation:drop .35s ease-out both}
-@keyframes drop{from{transform:translateY(calc(-120% * var(--r,1)));opacity:.6}to{transform:translateY(0);opacity:1}}
-.pointerRow{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;padding:0 10px 10px}
-.pointerRow button{height:16px;border:none;border-radius:10px;background:#ffffffaa;cursor:pointer}
-.pointerRow button:hover{background:#fff}
+.c4Wrap{width:min(820px,94vw);margin:10px auto 0;position:relative}
+.c4Board{position:relative;background:#7fc3da;border-radius:18px;padding:10px;overflow:hidden}
+.c4Board::before{content:"";position:absolute;inset:0;background:url("stage76.png") center/cover no-repeat;opacity:.26;pointer-events:none}
+.c4Grid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;position:relative;z-index:2}
+.c4Slot{aspect-ratio:1/1;border-radius:50%;background:#e6f7fd;box-shadow:inset 0 0 0 2px #ffffff70;position:relative}
+.coin{position:absolute;left:50%;transform:translate(-50%, -110%);width:72%;height:72%;object-fit:contain;filter:drop-shadow(0 10px 14px #00000020)}
+@keyframes drop{from{transform:translate(-50%,-110%)}to{transform:translate(-50%, -10%)}}
+
+/* ===== 神経衰弱（1人 & 2人） ===== */
+#mem1,#mem2{display:none}
+.memHud{display:flex;gap:14px;justify-content:center;align-items:center;margin:10px 0 10px;font-weight:700;flex-wrap:wrap}
+.memGrid{--gap:clamp(10px,3.4vw,14px);display:grid;gap:var(--gap);width:min(740px,92vw);margin:0 auto}
+.memCard{aspect-ratio:1/1;perspective:1000px;position:relative}
+.memInner{position:absolute;inset:0;transition:transform .42s ease;transform-style:preserve-3d;transform:rotateY(180deg)}
+.memInner.flipped{transform:rotateY(0deg)}
+.memFace{position:absolute;inset:0;border-radius:16px;overflow:hidden;backface-visibility:hidden;box-shadow:0 10px 24px rgba(0,0,0,.12);display:grid;place-items:center}
+.memFace.front{background:#fff;transform:rotateY(0deg)}
+.memFace.back{background:linear-gradient(135deg,#c9f0ff,#97d2e4);color:#084357;font-size:clamp(22px,6.4vw,28px);transform:rotateY(180deg)}
+.memFace.front img{width:78%;height:78%;object-fit:contain;pointer-events:none}
+.memInner.matched{animation:pop .36s ease}
+@keyframes pop{0%{transform:rotateY(0deg) scale(1)}50%{transform:rotateY(0deg) scale(1.06)}100%{transform:rotateY(0deg) scale(1)}}
+
+/* 共通のフッターボタン行 */
+.footBtns{display:flex;gap:12px;justify-content:center;margin:14px 0 0;flex-wrap:wrap}
+
+/* じゃんけん（簡略） */
+#janken{display:none}
+.topRow{margin-top:4px;display:flex;align-items:flex-start;justify-content:space-between;gap:clamp(10px,4vw,18px)}
+.frameBox{position:relative;flex:0 0 auto;width:clamp(160px,40vw,320px);aspect-ratio:3/4;background:url("frame2.png") center/contain no-repeat}
+.bossHandImg{position:absolute;left:8%;top:6%;width:84%;height:88%;object-fit:contain;filter:drop-shadow(0 10px 16px #00000018)}
+.bossPic{flex:0 0 auto;width:clamp(200px,42vw,360px);height:auto;object-fit:contain;filter:drop-shadow(0 10px 20px rgba(0,0,0,.12))}
+.hands{margin:16px auto 0;display:flex;justify-content:center;gap:clamp(12px,4vw,18px)}
+.handBtn{width:clamp(92px,22vw,136px);aspect-ratio:1/1;border-radius:18px;background:var(--white);box-shadow:0 10px 30px #075a6a22;display:grid;place-items:center;font-size:clamp(34px,10vw,52px);cursor:pointer;border:none}
+.win{color:var(--win);font-weight:800}.lose{color:var(--lose);font-weight:800}
 </style>
 </head>
 
 <body>
 <div class="wrap">
 
-  <!-- ============= タイトル ============= -->
-  <div class="container" id="title">
-    <div class="hero">
-      <span class="pill" id="titlePill">ミニゲームパーク</span>
-      <h2 id="titleHeading">めちゃつよボリューミー店長との<br>ジャンケン対決！</h2>
+<!-- ===== タイトル ===== -->
+<div class="container" id="title">
+  <div class="title-hero">
+    <span class="pill">ミニゲームパーク</span>
+    <h1 style="margin-top:4px">めちゃつよボリューミー店長との<br>ジャンケン対決</h1>
+    <img id="titleImg" class="title-illus" src="title-start2.png" alt="店長ポーズ">
+    <div id="speech">俺の強さに怖気づいたかっ！</div>
 
-      <img id="titleImg" class="title-illus" src="title-start2.png" alt="店長ポーズ">
-      <div id="speech" class="speech">俺の強さに怖気づいたかっ！</div>
-
-      <div class="btnrow" id="titleJankenRow">
-        <button class="btn primary" id="btnStart">挑戦する</button>
-        <button class="btn ghost"   id="btnQuit"  data-mode="quit">あきらめる</button>
-      </div>
-
-      <div class="btnrow">
-        <button class="btn ghost" id="btnScoop">2048で遊ぶ</button>
-        <button class="btn ghost" id="btn2p">2人で遊ぶ</button>
-      </div>
-      <div class="btnrow">
-        <button class="btn ghost" id="btnMem">神経衰弱（1人）</button>
-        <button class="btn ghost" id="btnJanken">じゃんけん</button>
-      </div>
-      <p class="title-note">店長 vs みんなで、ゆるっと対戦！</p>
-    </div>
-  </div>
-
-  <!-- ============= じゃんけん ============= -->
-  <div class="container" id="game">
-    <div class="topRow">
-      <div class="frameBox"><img id="bossHandImg" class="bossHandImg" src="rock2.png" alt="店長の手"></div>
-      <img class="bossPic" src="boss2.png" alt="店長">
-    </div>
-    <h1>～店長とジャンケン勝負～</h1>
-    <p class="sub">先に3回勝った方が勝ち！</p>
-    <div class="score" id="score">あなた 0 - 店長 0</div>
-    <div class="message" id="message">手を選んでね！</div>
-    <div class="hands" id="hands">
-      <button class="handBtn" data-hand="rock"     aria-label="グー">✊</button>
-      <button class="handBtn" data-hand="scissors" aria-label="チョキ">✌️</button>
-      <button class="handBtn" data-hand="paper"    aria-label="パー">✋</button>
-    </div>
-    <div class="resultCard" id="resultCard"></div>
-    <div class="restartRow" id="restartRow"><button class="btn ghost" id="restartBtn">再挑戦</button></div>
-    <div class="btnrow" style="margin-top:12px"><button class="btn ghost" id="backToTitle1">タイトルへ戻る</button></div>
-  </div>
-
-  <!-- ============= 神経衰弱(1人) ============= -->
-  <div class="container" id="memory">
-    <h1>〜神経衰弱〜</h1>
-    <p class="sub">同じアイスを2枚めくってペアを作ろう！</p>
-    <div class="memDiff">
-      <button class="btn primary" id="memEasyBtn">やさしい（4ペア）</button>
-      <button class="btn ghost"   id="memHardBtn">むずかしい（6ペア）</button>
-    </div>
-    <div class="memHud" id="memHud" style="display:none">
-      <span id="memMoves">手数: 0</span>
-      <span id="memPairs">ペア: 0 / 4</span>
-      <span class="lives" id="memLives" title="ライフ"><span class="heart">🩵</span><span class="heart">🩵</span><span class="heart">🩵</span></span>
-      <button class="btn ghost" id="memRetry">もう一回</button>
-    </div>
-    <div class="memGrid" id="memGrid" aria-label="カードの場"></div>
-    <div class="resultCard" id="memResult" style="display:none; margin-top:14px"></div>
-    <div class="btnrow" style="margin-top:10px"><button class="btn ghost" id="memBack">タイトルへ戻る</button></div>
-  </div>
-
-  <!-- ============= 2048 ============= -->
-  <div class="container" id="scoop">
-    <h1>〜2048パズル〜</h1>
-    <p class="sub">同じ数字を合体させて高スコアを目指そう</p>
-    <div class="scoopHud">
-      <span id="scScore">スコア: 0</span>
-      <span id="scBest">ベスト: 0</span>
-      <div class="scoopBtns">
-        <button class="btn ghost" id="scUndo">1手戻る</button>
-        <button class="btn ghost" id="scRetry">もう一回</button>
-      </div>
-    </div>
-    <div class="scoopBoard">
-      <div class="scGrid" id="scGridBg"></div>
-      <div class="scTiles" id="scTiles"></div>
-    </div>
-    <div class="resultCard" id="scResult" style="display:none; margin-top:14px"></div>
-    <div id="scPad"><div class="pad">
-      <button class="up"    aria-label="上へ">↑</button>
-      <button class="left"  aria-label="左へ">←</button>
-      <button class="right" aria-label="右へ">→</button>
-      <button class="down"  aria-label="下へ">↓</button>
-    </div></div>
-    <div class="btnrow" style="margin-top:10px"><button class="btn ghost" id="scBack">タイトルへ戻る</button></div>
-  </div>
-
-  <!-- ============= 2人プレイ：交互に選ぶ ============= -->
-  <div class="container" id="versus" style="display:none">
-    <h1>2人で遊ぶ</h1>
-    <p class="sub"><span class="pill" id="vsTurnPill">P1 を選んでね</span></p>
-    <div class="roster" id="vsRoster"></div>
-    <div class="btnrow" style="margin-top:10px"><button class="btn ghost" id="vsBack">タイトルへ戻る</button></div>
-  </div>
-
-  <!-- 2人プレイ：ゲーム選択 -->
-  <div class="container" id="vsGameMenu" style="display:none">
-    <h1>ゲームを選ぶ</h1>
-    <p class="sub">選んだキャラで対戦！</p>
     <div class="btnrow">
-      <button class="btn primary" id="goTic">◯✕ゲーム</button>
-      <button class="btn primary" id="goConnect4">コイン落とし（四目並べ）</button>
-      <button class="btn ghost"   id="goMem2p" disabled>神経衰弱（2人）※後日</button>
+      <button class="btn primary" id="btnStart">挑戦する</button>
+      <button class="btn white"   id="btnQuit"  data-mode="quit">あきらめる</button>
     </div>
-    <div class="btnrow" style="margin-top:10px">
-      <button class="btn ghost" id="vsGameBack">キャラを選び直す</button>
-      <button class="btn ghost" id="vsGameToTitle">タイトルへ戻る</button>
+    <div class="btnrow">
+      <button class="btn ghost"   id="btnScoop">2048で遊ぶ</button>
+      <button class="btn orange"  id="btnDuo">2人で遊ぶ</button>
     </div>
-  </div>
+    <div class="btnrow">
+      <button class="btn ghost"   id="btnMem1">神経衰弱（1人）</button>
+      <button class="btn ghost"   id="btnJanken">じゃんけん</button>
+    </div>
 
-  <!-- ============= ◯✕ゲーム ============= -->
-  <div class="container" id="tic" style="display:none">
-    <h1>〜◯✕ゲーム〜</h1>
-    <div class="ticHud">
-      <div class="playerBadge" id="ticP1"><img class="badgePic" id="ticP1pic"><div><div id="ticP1name">P1</div><div class="ticSay" id="ticP1say">　</div></div></div>
-      <span class="pill" id="ticTurn">P1のターン</span>
-      <div class="playerBadge" id="ticP2"><img class="badgePic" id="ticP2pic"><div><div id="ticP2name">P2</div><div class="ticSay" id="ticP2say">　</div></div></div>
-    </div>
-    <div class="ticBoard"><div class="ticGrid" id="ticGrid"></div></div>
-    <div class="resultCard" id="ticResult"></div>
-    <div class="btnrow"><button class="btn ghost" id="ticRetry">もう一回</button><button class="btn ghost" id="ticOther">他のゲームへ</button></div>
-    <div class="btnrow" style="margin-top:10px"><button class="btn ghost" id="ticBack">タイトルへ戻る</button></div>
+    <p class="sub" style="margin:10px 0 16px">店長 vs みんなで、ゆるっと対戦！</p>
   </div>
+</div>
 
-  <!-- ============= 四目並べ ============= -->
-  <div class="container" id="c4" style="display:none">
-    <h1>〜コイン落とし（四目並べ）〜</h1>
-    <div class="c4Hud">
-      <div class="playerBadge" id="c4P1"><img class="badgePic" id="c4P1pic"><div><div id="c4P1name">P1</div></div></div>
-      <span class="pill" id="c4Turn">P1のターン</span>
-      <div class="playerBadge" id="c4P2"><img class="badgePic" id="c4P2pic"><div><div id="c4P2name">P2</div></div></div>
-    </div>
-    <div class="c4BoardWrap">
-      <div class="pointerRow" id="c4Pointers"></div>
-      <div class="c4Grid" id="c4Grid"></div>
-    </div>
-    <div class="resultCard" id="c4Result"></div>
-    <div class="btnrow"><button class="btn ghost" id="c4Retry">もう一回</button><button class="btn ghost" id="c4Other">他のゲームへ</button></div>
-    <div class="btnrow" style="margin-top:10px"><button class="btn ghost" id="c4Back">タイトルへ戻る</button></div>
+<!-- ===== じゃんけん ===== -->
+<div class="container" id="janken">
+  <div class="topRow">
+    <div class="frameBox"><img id="bossHandImg" class="bossHandImg" src="rock2.png" alt=""></div>
+    <img class="bossPic" src="boss2.png" alt="店長">
   </div>
+  <h1>～店長とジャンケン勝負～</h1>
+  <p class="sub">先に3回勝った方が勝ち！</p>
+  <div class="score" id="jkScore" style="text-align:center;font-weight:900">あなた 0 - 店長 0</div>
+  <div class="sub" id="jkMsg">手を選んでね！</div>
+  <div class="hands">
+    <button class="handBtn" data-hand="rock">✊</button>
+    <button class="handBtn" data-hand="scissors">✌️</button>
+    <button class="handBtn" data-hand="paper">✋</button>
+  </div>
+  <div class="resultCard" id="jkResult"></div>
+  <div class="footBtns"><button class="btn ghost" id="jkRetry">もう一回</button>
+    <button class="btn ghost" id="backTitleA">タイトルへ戻る</button></div>
+</div>
+
+<!-- ===== 2048 ===== -->
+<div class="container" id="scoop" style="display:none">
+  <h1>〜2048パズル〜</h1>
+  <p class="sub">同じ数字を合体させて高スコアを目指そう</p>
+  <div class="scoopHud">
+    <span id="scScore">スコア: 0</span><span id="scBest">ベスト: 0</span>
+    <div class="scoopBtns">
+      <button class="btn ghost" id="scUndo">1手戻る</button>
+      <button class="btn ghost" id="scRetry">もう一回</button>
+    </div>
+  </div>
+  <div class="scoopBoard">
+    <div class="scGrid" id="scGridBg"></div>
+    <div class="scTiles" id="scTiles"></div>
+  </div>
+  <div class="resultCard" id="scResult" style="display:none;margin-top:14px"></div>
+  <div id="scPad">
+    <div class="pad">
+      <button class="up">↑</button><button class="left">←</button>
+      <button class="right">→</button><button class="down">↓</button>
+    </div>
+  </div>
+  <div class="footBtns"><button class="btn ghost" id="scBack">タイトルへ戻る</button></div>
+</div>
+
+<!-- ===== 2人：キャラ選択 → ゲーム選択 ===== -->
+<div class="container" id="select" style="display:none">
+  <h1>2人で遊ぶ</h1>
+  <p class="sub">プレイヤー1と2のキャラを選んでね（同じは店長だけ可・表示で知らせません）</p>
+  <div id="selGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:18px;max-width:min(820px,94vw);margin:12px auto 0">
+    <div>
+      <p class="pill" style="display:inline-block">P1</p>
+      <div id="p1Choices" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px"></div>
+    </div>
+    <div>
+      <p class="pill" style="display:inline-block">P2</p>
+      <div id="p2Choices" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px"></div>
+    </div>
+  </div>
+  <div class="btnrow" style="margin-top:14px"><button class="btn primary" id="goGame" disabled>ゲームを選ぶ</button></div>
+  <div class="btnrow"><button class="btn ghost" id="selBack">タイトルへ戻る</button></div>
+</div>
+
+<div class="container" id="duoMenu" style="display:none">
+  <h1>ゲームを選ぶ</h1>
+  <p class="sub">選んだキャラで対戦！</p>
+  <div class="btnrow">
+    <button class="btn primary" id="goTTT">○×ゲーム</button>
+  </div>
+  <div class="btnrow">
+    <button class="btn primary" id="goC4">コイン落とし（四目並べ）</button>
+  </div>
+  <div class="btnrow">
+    <button class="btn ghost" id="goMem2">神経衰弱（2人）</button>
+  </div>
+  <div class="btnrow"><button class="btn ghost" id="reselect">キャラを選び直す</button>
+    <button class="btn ghost" id="menuBack">タイトルへ戻る</button></div>
+</div>
+
+<!-- ===== ○× ===== -->
+<div class="container" id="ttt">
+  <h1>〜○×ゲーム〜</h1>
+  <div class="duoHud">
+    <div class="pBadge" id="tttP1"><img><span class="name">P1</span><div class="line" style="font-weight:700;color:#666"></div></div>
+    <div class="turnTag" id="tttTurn">P1のターン</div>
+    <div class="pBadge" id="tttP2"><img><span class="name">P2</span><div class="line" style="font-weight:700;color:#666"></div></div>
+  </div>
+  <div class="tttBoard"><div class="tttGrid" id="tttGrid"></div></div>
+  <div class="resultCard" id="tttResult"></div>
+  <div class="footBtns"><button class="btn ghost" id="tttAgain">もう一回</button>
+    <button class="btn ghost" id="toDuoFromTTT">他のゲームへ</button>
+    <button class="btn ghost" id="backTitleB">タイトルへ戻る</button></div>
+</div>
+
+<!-- ===== 四目並べ ===== -->
+<div class="container" id="c4">
+  <h1>〜コイン落とし（四目並べ）〜</h1>
+  <div class="duoHud">
+    <div class="pBadge" id="c4P1"><img><span class="name">P1</span><div class="line" style="font-weight:700;color:#666"></div></div>
+    <div class="turnTag" id="c4Turn">P1のターン</div>
+    <div class="pBadge" id="c4P2"><img><span class="name">P2</span><div class="line" style="font-weight:700;color:#666"></div></div>
+  </div>
+  <div class="c4Wrap"><div class="c4Board"><div class="c4Grid" id="c4Grid"></div></div></div>
+  <div class="resultCard" id="c4Result"></div>
+  <div class="footBtns"><button class="btn ghost" id="c4Again">もう一回</button>
+    <button class="btn ghost" id="toDuoFromC4">他のゲームへ</button>
+    <button class="btn ghost" id="backTitleC">タイトルへ戻る</button></div>
+</div>
+
+<!-- ===== 神経衰弱（1人） ===== -->
+<div class="container" id="mem1">
+  <h1>〜神経衰弱（1人）〜</h1>
+  <div class="memHud"><span id="m1Moves">手数: 0</span><button class="btn ghost" id="m1Retry">もう一回</button></div>
+  <div class="memGrid" id="m1Grid"></div>
+  <div class="resultCard" id="m1Result"></div>
+  <div class="footBtns"><button class="btn ghost" id="backTitleD">タイトルへ戻る</button></div>
+</div>
+
+<!-- ===== 神経衰弱（2人：7ペア固定） ===== -->
+<div class="container" id="mem2">
+  <h1>〜神経衰弱（2人）〜</h1>
+  <div class="duoHud">
+    <div class="pBadge" id="m2P1"><img><span class="name">P1</span><div class="line" style="font-weight:700;color:#666"></div></div>
+    <div class="turnTag" id="m2Turn">P1のターン</div>
+    <div class="pBadge" id="m2P2"><img><span class="name">P2</span><div class="line" style="font-weight:700;color:#666"></div></div>
+  </div>
+  <div class="memHud"><span id="m2Score">P1:0 / P2:0（全7ペア）</span><button class="btn ghost" id="m2Retry">もう一回</button></div>
+  <div class="memGrid" id="m2Grid" style="grid-template-columns:repeat(4,1fr)"></div>
+  <div class="resultCard" id="m2Result"></div>
+  <div class="footBtns"><button class="btn ghost" id="toDuoFromM2">他のゲームへ</button>
+    <button class="btn ghost" id="backTitleE">タイトルへ戻る</button></div>
+</div>
 
 </div><!-- /.wrap -->
 
 <script>
-/* ===== 画面参照 ===== */
-const titleView = document.getElementById('title');
-const gameView  = document.getElementById('game');
-const memView   = document.getElementById('memory');
-const scoopView = document.getElementById('scoop');
-const vsView    = document.getElementById('versus');
-const vsGameMenu= document.getElementById('vsGameMenu');
-const ticView   = document.getElementById('tic');
-const c4View    = document.getElementById('c4');
-
-/* ===== タイトル：ボタン ===== */
-const titleImg  = document.getElementById('titleImg');
-const speech    = document.getElementById('speech');
-const btnStart  = document.getElementById('btnStart');
-const btnQuit   = document.getElementById('btnQuit');
-document.getElementById('btnScoop').addEventListener('click', showScoop);
-document.getElementById('btn2p').addEventListener('click', showVersus);
-document.getElementById('btnMem').addEventListener('click', showMemoryMenu);
-document.getElementById('btnJanken').addEventListener('click', startGame);
-
-btnQuit.addEventListener('click', () => {
-  if (btnQuit.dataset.mode === 'quit') {
-    speech.style.display = 'block';
-    titleImg.src = 'title-quit2.png';
-    btnQuit.textContent = '挑戦する';
-    btnQuit.dataset.mode = 'start';
-    btnQuit.classList.remove('ghost'); btnQuit.classList.add('primary');
-  } else { startGame(); }
-});
-btnStart.addEventListener('click', startGame);
-
-function showTitle(){
-  [gameView,memView,scoopView,vsView,vsGameMenu,ticView,c4View].forEach(v=>v.style.display='none');
-  titleView.style.display='block';
-  speech.style.display='none';
-  titleImg.src = 'title-start2.png';
-  btnQuit.textContent = 'あきらめる';
-  btnQuit.dataset.mode = 'quit';
-  btnQuit.classList.add('ghost'); btnQuit.classList.remove('primary');
-  window.scrollTo({top:0, behavior:'smooth'});
-}
-
-/* =================================================
-   じゃんけん
-   ================================================= */
-function startGame(){
-  [titleView,memView,scoopView,vsView,vsGameMenu,ticView,c4View].forEach(v=>v.style.display='none');
-  gameView.style.display = 'block';
-  resetGame();
+/* ===== 共通：画面切替 ===== */
+const views = {
+  title:document.getElementById('title'),
+  janken:document.getElementById('janken'),
+  scoop:document.getElementById('scoop'),
+  select:document.getElementById('select'),
+  duoMenu:document.getElementById('duoMenu'),
+  ttt:document.getElementById('ttt'),
+  c4:document.getElementById('c4'),
+  mem1:document.getElementById('mem1'),
+  mem2:document.getElementById('mem2'),
+};
+function show(id){
+  Object.values(views).forEach(v=>v.style.display='none');
+  views[id].style.display='block';
   window.scrollTo({top:0,behavior:'smooth'});
 }
-const WIN_TARGET=3, BOSS_EDGE=0.70;
-const scoreEl=document.getElementById('score'), messageEl=document.getElementById('message');
-const handsWrap=document.getElementById('hands'), resultCard=document.getElementById('resultCard'), restartRow=document.getElementById('restartRow');
-const bossHandImg=document.getElementById('bossHandImg');
-let score = { you:0, boss:0 };
-const IMG    = { rock:'rock2.png', scissors:'scissors2.png', paper:'paper2.png' };
-const WINMAP = { rock:'scissors', scissors:'paper', paper:'rock' };
-function resetGame(){ score.you=0; score.boss=0; updateScore(); messageEl.textContent='手を選んでね！'; bossHandImg.src=IMG.rock; resultCard.style.display='none'; restartRow.style.display='none'; handsWrap.style.display='flex'; }
-function updateScore(){ scoreEl.textContent=`あなた ${score.you} - 店長 ${score.boss}`; }
-function bossPick(player){
-  const beat = ({rock:'paper', paper:'scissors', scissors:'rock'})[player];
-  const lose = WINMAP[player];
-  const tie  = player;
-  if (Math.random() < BOSS_EDGE) return beat;
-  return [lose, tie][Math.random()<0.5 ? 0 : 1];
-}
-function play(player){
-  if (handsWrap.style.display==='none') return;
-  const boss = bossPick(player); bossHandImg.src = IMG[boss];
-  if (player===boss){ messageEl.textContent='あいこ！次の手を選んでね'; }
-  else if (WINMAP[player]===boss){ score.you++; updateScore(); messageEl.innerHTML=`<span class="win">あなたの勝ち！</span> 次の手を選んでね`; }
-  else { score.boss++; updateScore(); messageEl.innerHTML=`<span class="lose">店長の勝ち！</span> 次の手を選んでね`; }
-  checkFinish();
-}
-function checkFinish(){
-  if (score.you>=WIN_TARGET || score.boss>=WIN_TARGET){
-    handsWrap.style.display='none'; resultCard.style.display='block'; restartRow.style.display='flex';
-    resultCard.innerHTML = (score.you>=WIN_TARGET)
-      ? `<strong>🎉 あなたの勝ち！</strong><div style="margin-top:6px">おめでとう！</div>`
-      : `<strong>👑 店長の勝ち！</strong><div style="margin-top:6px">また挑戦してね！</div>`;
-  }
-}
-document.querySelectorAll('.handBtn').forEach(b=>b.addEventListener('click', ()=>play(b.dataset.hand)));
-document.getElementById('restartBtn').addEventListener('click', resetGame);
-document.getElementById('backToTitle1').addEventListener('click', showTitle);
 
-/* =================================================
-   神経衰弱（1人）
-   ================================================= */
-const USE_ICE_IMAGES=true;
-const ICE_SET=[
-  { img:'ice1.png', emoji:'🍨', name:'プレーン' },
-  { img:'ice2.png', emoji:'🍫', name:'チョコ' },
-  { img:'ice3.png', emoji:'🍵', name:'そのぎ茶' },
-  { img:'ice4.png', emoji:'🔔', name:'ちりんちりんくん' },
-  { img:'ice5.png', emoji:'👨', name:'店長1' },
-  { img:'ice6.png', emoji:'🧑', name:'店長2' },
+/* ===== タイトルのボタン ===== */
+const titleImg = document.getElementById('titleImg');
+const speech   = document.getElementById('speech');
+document.getElementById('btnStart').addEventListener('click', ()=>{ show('janken'); jkReset(); });
+document.getElementById('btnQuit').addEventListener('click', e=>{
+  const btn=e.currentTarget;
+  if(btn.dataset.mode==='quit'){
+    speech.style.display='block'; titleImg.src='title-quit2.png';
+    btn.textContent='挑戦する'; btn.dataset.mode='start';
+  }else{ show('janken'); jkReset(); }
+});
+document.getElementById('btnScoop').addEventListener('click', ()=>{ show('scoop'); setupScoop(); document.getElementById('scPad').style.display='block'; });
+document.getElementById('btnDuo').addEventListener('click', ()=>{ show('select'); renderSelect(); });
+document.getElementById('btnMem1').addEventListener('click', ()=>{ show('mem1'); m1Start(); });
+document.getElementById('btnJanken').addEventListener('click', ()=>{ show('janken'); jkReset(); });
+
+/* ======== キャラクター定義 ======== */
+const CHARS = [
+  { id:'boss',   name:'店長',   avatar:'character1.png', avatar2:'character1-2.png', coin:'coin1.png', coin2:'coin1-2.png',
+    win:'俺に勝とうなんて100年早い！', lose:'いやーん！' },
+  { id:'wife',   name:'奥さん', avatar:'character2.png', coin:'coin2.png',
+    win:'今日は私の勝ちね！',       lose:'次は負けないわよ…' },
+  { id:'part',   name:'バイト', avatar:'character3.png', coin:'coin3.png',
+    win:'やったっす！',             lose:'マジか…' },
+  { id:'ceo',    name:'社長',   avatar:'character4.png', coin:'coin4.png',
+    win:'私が1番よ！',               lose:'あんた減給ね…' },
 ];
-const memGrid=document.getElementById('memGrid');
-const memHud=document.getElementById('memHud');
-const memMoves=document.getElementById('memMoves');
-const memPairs=document.getElementById('memPairs');
-const memRetry=document.getElementById('memRetry');
-const memBack=document.getElementById('memBack');
-const memResult=document.getElementById('memResult');
-const memLives=document.getElementById('memLives');
-const memEasyBtn=document.getElementById('memEasyBtn');
-const memHardBtn=document.getElementById('memHardBtn');
-const MAX_LIVES=3; let TYPES_COUNT=4; let memDeck=[]; let first=null, second=null, lock=false; let pairs=0, moves=0; let lives=MAX_LIVES; let memOver=false;
-function showMemoryMenu(){ [titleView,gameView,scoopView,vsView,vsGameMenu,ticView,c4View].forEach(v=>v.style.display='none'); memView.style.display='block'; memHud.style.display='none'; memGrid.innerHTML=''; memResult.style.display='none'; window.scrollTo({top:0,behavior:'smooth'}); }
-memEasyBtn.addEventListener('click', ()=> startMemory(4));
-memHardBtn.addEventListener('click', ()=> startMemory(6));
-function startMemory(types=4){
-  TYPES_COUNT=types; buildMemDeck(); renderMem(); pairs=0; moves=0; lock=false; first=second=null; memOver=false; lives=MAX_LIVES;
-  updateMemHud(); renderLives(); memResult.style.display='none'; memHud.style.display='flex'; window.scrollTo({top:0,behavior:'smooth'});
-}
-function updateMemHud(){ memMoves.textContent=`手数: ${moves}`; memPairs.textContent=`ペア: ${pairs} / ${TYPES_COUNT}`; }
-function renderLives(){ const hearts=memLives.querySelectorAll('.heart'); hearts.forEach((h,i)=>h.classList.toggle('lost', i>=lives)); }
-function buildMemDeck(){ memDeck=[]; for(let i=0;i<TYPES_COUNT;i++){ memDeck.push({id:i}); memDeck.push({id:i}); } for(let i=memDeck.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [memDeck[i],memDeck[j]]=[memDeck[j],memDeck[i]]; } }
-function renderMem(){
-  memGrid.innerHTML=''; memDeck.forEach((card,idx)=>{
-    const c=document.createElement('div'); c.className='memCard'; c.dataset.index=idx;
-    const inner=document.createElement('div'); inner.className='memInner'; inner.setAttribute('role','button'); inner.setAttribute('aria-label','カードをめくる');
-    const front=document.createElement('div'); front.className='memFace front';
-    const img=document.createElement('img'); img.src=ICE_SET[card.id].img; img.alt=ICE_SET[card.id].name;
-    const emoji=document.createElement('span'); emoji.textContent=ICE_SET[card.id].emoji; emoji.style.fontSize='clamp(32px,10vw,56px)';
-    img.addEventListener('load',()=>{emoji.style.display='none'}); img.addEventListener('error',()=>{img.style.display='none'});
-    front.append(img,emoji);
-    const back=document.createElement('div'); back.className='memFace back'; back.textContent='🍨';
-    inner.append(front,back); c.append(inner); memGrid.append(c);
-    c.addEventListener('click',()=>flipMem(idx, inner));
+let P1=null, P2=null; // {name, avatar, coin, special:'boss_winter'?}
+
+/* ===== キャラ選択 ===== */
+function renderChoices(container, who){
+  container.innerHTML='';
+  CHARS.forEach(c=>{
+    const card=document.createElement('button');
+    card.className='btn white';
+    card.style.padding='8px'; card.style.display='grid'; card.style.placeItems='center';
+    card.style.borderRadius='16px';
+    card.innerHTML=`<img src="${c.avatar}" alt="" style="width:82px;height:82px;object-fit:cover;border-radius:12px;display:block">
+                    <div style="font-weight:900;margin-top:6px">${c.name}</div>`;
+    card.addEventListener('click', ()=>{
+      if(who==='P2' && P1 && P1.id!== 'boss' && c.id===P1.id){ return; } // 同キャラ禁止（店長以外）通知なし
+      const picked = {...c};
+      if (who==='P2' && P1 && P1.id==='boss' && c.id==='boss'){
+        picked.avatar = c.avatar2; picked.coin = c.coin2; picked.special='boss_winter';
+      }
+      if(who==='P1'){ P1=picked; } else { P2=picked; }
+      checkReady();
+      // P2を選んだら自動でゲーム選択へ
+      if (P1 && P2) { show('duoMenu'); duoHeaderInit(); bossDoubleShot(); }
+    });
+    container.appendChild(card);
   });
 }
-function flipMem(idx,innerEl){
-  if (memOver||lock) return; if (innerEl.classList.contains('flipped')) return;
-  innerEl.classList.add('flipped'); if (!first){ first={idx,id:memDeck[idx].id,el:innerEl}; navigator.vibrate?.(15); return; }
-  second={idx,id:memDeck[idx].id,el:innerEl}; lock=true; moves++; updateMemHud();
-  if (first.id===second.id){ setTimeout(()=>{ first.el.classList.add('matched'); second.el.classList.add('matched'); pairs++; updateMemHud(); first=second=null; lock=false;
-      if (pairs>=TYPES_COUNT){ memOver=true; memResult.style.display='block'; memResult.innerHTML=`<strong>🎉 ぜんぶそろった！</strong><div style="margin-top:6px">おめでとう！</div>`; } navigator.vibrate?.([20,40,20]); },220);
-  } else {
-    lives=Math.max(0,lives-1); renderLives();
-    setTimeout(()=>{ first.el.classList.remove('flipped'); second.el.classList.remove('flipped'); first=second=null; lock=false; navigator.vibrate?.(30);
-      if (lives<=0 && !memOver){ memOver=true; memResult.style.display='block'; memResult.innerHTML=`<strong>💥 おしまい！</strong><div style="margin-top:6px">また挑戦してね！</div>`; }
-    },700);
+function renderSelect(){
+  P1=P2=null; document.getElementById('goGame').disabled=true;
+  renderChoices(document.getElementById('p1Choices'),'P1');
+  renderChoices(document.getElementById('p2Choices'),'P2');
+}
+function checkReady(){ document.getElementById('goGame').disabled = !(P1&&P2); }
+document.getElementById('selBack').addEventListener('click', ()=>show('title'));
+document.getElementById('goGame').addEventListener('click', ()=>{ show('duoMenu'); duoHeaderInit(); bossDoubleShot(); });
+
+/* ===== Duoメニュー ===== */
+document.getElementById('goTTT').addEventListener('click', ()=>{ show('ttt'); tttStart(); });
+document.getElementById('goC4').addEventListener('click',  ()=>{ show('c4');  c4Start(); });
+document.getElementById('goMem2').addEventListener('click',()=>{ show('mem2'); m2Start(); });
+document.getElementById('reselect').addEventListener('click', ()=>show('select'));
+document.getElementById('menuBack').addEventListener('click', ()=>show('title'));
+
+function duoHeaderInit(){
+  // TTT
+  ['tttP1','tttP2'].forEach((id,i)=>{
+    const el=document.getElementById(id); const me=i?P2:P1;
+    el.querySelector('img').src=me.avatar; el.querySelector('.name').textContent=me.name;
+    el.querySelector('.line').textContent='';
+  });
+  // C4
+  ['c4P1','c4P2'].forEach((id,i)=>{
+    const el=document.getElementById(id); const me=i?P2:P1;
+    el.querySelector('img').src=me.avatar; el.querySelector('.name').textContent=me.name;
+    el.querySelector('.line').textContent='';
+  });
+  // M2
+  ['m2P1','m2P2'].forEach((id,i)=>{
+    const el=document.getElementById(id); const me=i?P2:P1;
+    el.querySelector('img').src=me.avatar; el.querySelector('.name').textContent=me.name;
+    el.querySelector('.line').textContent='';
+  });
+}
+function bossDoubleShot(){
+  if(P1&&P2&&P1.id==='boss'&&P2.id==='boss'){
+    const t = document.createElement('div');
+    t.style.cssText='position:fixed;inset:auto 0 18%;margin:auto;width:fit-content;padding:10px 14px;background:#fff;border-radius:12px;box-shadow:0 10px 26px #00000020;font-weight:900;text-align:center;z-index:50';
+    t.textContent='俺が2人！？';
+    document.body.appendChild(t);
+    setTimeout(()=>t.remove(),1200);
   }
 }
-memRetry.addEventListener('click', ()=> startMemory(TYPES_COUNT));
-memBack.addEventListener('click', showTitle);
 
-/* =================================================
-   2048（合成パズル） ＊矢印パッド復活
-   ================================================= */
-const scGridBg=document.getElementById('scGridBg'), scTiles=document.getElementById('scTiles');
-const scScore=document.getElementById('scScore'), scBest=document.getElementById('scBest');
-const scUndo=document.getElementById('scUndo'), scRetry=document.getElementById('scRetry'), scResult=document.getElementById('scResult');
-const IMAGE_LABEL={128:'屋台',256:'アイス',512:'店長',1024:'店長キメポーズ',2048:'社長'};
-let board=[], scoreNow=0, best=Number(localStorage.getItem('scoop_best')||0), prevState=null;
-function showScoop(){ [titleView,gameView,memView,vsView,vsGameMenu,ticView,c4View].forEach(v=>v.style.display='none'); scoopView.style.display='block'; setupScoop(); document.getElementById('scPad').style.display='block'; window.scrollTo({top:0,behavior:'smooth'}); }
-document.getElementById('scBack').addEventListener('click', ()=>{ document.getElementById('scPad').style.display='none'; showTitle(); });
-function setupScoop(){ if (!scGridBg.childElementCount){ for(let i=0;i<16;i++){ const c=document.createElement('div'); c.className='cell'; scGridBg.appendChild(c); } }
-  best=Number(localStorage.getItem('scoop_best')||0); scoreNow=0; board=new Array(16).fill(0); prevState=null; spawn(); spawn(); draw(); scResult.style.display='none'; }
-function spawn(){ const zeros=board.map((v,i)=>v===0?i:null).filter(v=>v!==null); if(!zeros.length) return false; const pos=zeros[Math.floor(Math.random()*zeros.length)]; board[pos]=Math.random()<0.9?2:4; return true; }
-function canMove(){ if(board.includes(0)) return true; for(let r=0;r<4;r++)for(let c=0;c<4;c++){ const i=r*4+c,v=board[i]; if(c<3 && board[i+1]===v) return true; if(r<3 && board[i+4]===v) return true; } return false; }
-function lineMove(line){ let arr=line.filter(v=>v!==0); let scoreGain=0; for(let i=0;i<arr.length-1;i++){ if(arr[i]!==0 && arr[i]===arr[i+1]){ arr[i]*=2; scoreGain+=arr[i]; arr[i+1]=0; i++; } } arr=arr.filter(v=>v!==0); while(arr.length<4) arr.push(0); return {line:arr, gain:scoreGain}; }
-function move(dir){
-  const before=board.slice(); prevState={board:before.slice(), score:scoreNow}; let totalGain=0;
-  if(dir==='L'||dir==='R'){ for(let r=0;r<4;r++){ let row=board.slice(r*4,r*4+4); if(dir==='R') row.reverse(); const {line,gain}=lineMove(row); totalGain+=gain; if(dir==='R') line.reverse(); for(let c=0;c<4;c++) board[r*4+c]=line[c]; } }
-  else { for(let c=0;c<4;c++){ let col=[board[c],board[c+4],board[c+8],board[c+12]]; if(dir==='D') col.reverse(); const {line,gain}=lineMove(col); totalGain+=gain; if(dir==='D') line.reverse(); [board[c],board[c+4],board[c+8],board[c+12]]=line; } }
-  if(board.join('')===before.join('')){ prevState=null; return; }
-  scoreNow+=totalGain; if(scoreNow>best){ best=scoreNow; localStorage.setItem('scoop_best', String(best)); }
-  spawn(); draw(); checkState();
+/* ===== セリフ（試合後のみ2.5秒） ===== */
+function sayLine(whereId, text){
+  const el=document.getElementById(whereId).querySelector('.line');
+  el.textContent=text; el.style.opacity='1';
+  setTimeout(()=>{ el.style.opacity='0'; el.textContent=''; }, 2500);
 }
-function checkState(){ const maxTile=Math.max(...board); if(maxTile>=2048){ scResult.style.display='block'; scResult.innerHTML=`<strong>🎉 2048達成！${IMAGE_LABEL[2048]||''}</strong><div style="margin-top:6px">おめでとう！</div>`; }
-  else scResult.style.display='none';
-  if(!canMove()){ scResult.style.display='block'; scResult.innerHTML=`<strong>💥 おしまい！</strong><div style="margin-top:6px">スコア ${scoreNow}（ベスト ${best}） また挑戦してね！</div>`; } }
-function draw(){
+
+/* ===== ○× ===== */
+const tttGrid = document.getElementById('tttGrid');
+const tttTurn = document.getElementById('tttTurn');
+const tttResult = document.getElementById('tttResult');
+let tttBoard, tttPlayer; // 0=空, 1=P1(×), 2=P2(○)
+
+function tttStart(){
+  tttBoard = Array(9).fill(0);
+  tttPlayer = Math.random()<0.5 ? 1 : 2; // ランダム先攻
+  tttTurn.textContent = `P${tttPlayer}のターン`;
+  document.getElementById('tttP1').classList.toggle('turn', tttPlayer===1);
+  document.getElementById('tttP2').classList.toggle('turn', tttPlayer===2);
+  tttResult.style.display='none';
+  tttGrid.innerHTML='';
+  for(let i=0;i<9;i++){
+    const c=document.createElement('div'); c.className='tttCell';
+    const s=document.createElement('span'); s.textContent='';
+    c.appendChild(s);
+    c.addEventListener('click', ()=>{
+      if(tttBoard[i]) return;
+      tttBoard[i]= tttPlayer;
+      s.textContent = tttPlayer===1 ? '×' : '○';
+      const win = tttCheck();
+      if(win){ tttFinish(win); return; }
+      tttPlayer = tttPlayer===1?2:1;
+      tttTurn.textContent = `P${tttPlayer}のターン`;
+      document.getElementById('tttP1').classList.toggle('turn', tttPlayer===1);
+      document.getElementById('tttP2').classList.toggle('turn', tttPlayer===2);
+    });
+    tttGrid.appendChild(c);
+  }
+}
+function tttCheck(){
+  const b=tttBoard;
+  const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  for(const [a,b1,c] of lines){ if(b[a]&&b[a]===b[b1]&&b[a]===b[c]) return b[a]; }
+  if(b.every(v=>v)) return -1;
+  return 0;
+}
+function tttFinish(who){
+  Array.from(tttGrid.children).forEach(el=>el.classList.add('disabled'));
+  tttResult.style.display='block';
+  if(who===-1){ tttResult.innerHTML='<strong>引き分け！</strong>'; return; }
+  const winner = who===1?P1:P2, loser = who===1?P2:P1;
+  tttResult.innerHTML=`<strong>🎉 P${who}の勝ち！</strong>`;
+  // セリフ
+  if(P1.id==='boss'&&P2.id==='boss'){
+    sayLine(who===1?'tttP1':'tttP2','俺が本物の店長だ！');
+    sayLine(who===1?'tttP2':'tttP1','俺に負けた…');
+  }else{
+    sayLine(who===1?'tttP1':'tttP2', winner.win);
+    sayLine(who===1?'tttP2':'tttP1', loser.lose);
+  }
+}
+document.getElementById('tttAgain').addEventListener('click', tttStart);
+document.getElementById('toDuoFromTTT').addEventListener('click', ()=>show('duoMenu'));
+document.getElementById('backTitleB').addEventListener('click', ()=>show('title'));
+
+/* ===== 四目並べ（7x6） ===== */
+const c4Grid = document.getElementById('c4Grid');
+const c4Turn = document.getElementById('c4Turn');
+const c4Result = document.getElementById('c4Result');
+let c4Board, c4Player;
+function c4Start(){
+  c4Board = Array.from({length:6},()=>Array(7).fill(0));
+  c4Player = Math.random()<0.5?1:2;
+  c4Turn.textContent=`P${c4Player}のターン`;
+  document.getElementById('c4P1').classList.toggle('turn', c4Player===1);
+  document.getElementById('c4P2').classList.toggle('turn', c4Player===2);
+  c4Result.style.display='none';
+  c4Grid.innerHTML='';
+  for(let r=0;r<6;r++){
+    for(let c=0;c<7;c++){
+      const slot=document.createElement('div'); slot.className='c4Slot'; slot.dataset.col=c;
+      slot.addEventListener('click', ()=>c4Drop(c));
+      c4Grid.appendChild(slot);
+    }
+  }
+}
+function c4Drop(col){
+  // 最下段から探す
+  let row=-1;
+  for(let r=5;r>=0;r--){ if(!c4Board[r][col]){ row=r; break; } }
+  if(row===-1) return; // 満杯
+  c4Board[row][col]=c4Player;
+
+  const slot = c4Grid.children[row*7+col];
+  const img=document.createElement('img'); img.className='coin';
+  const me = c4Player===1?P1:P2;
+  img.src = me.coin; img.style.animation='drop .22s ease forwards';
+  slot.appendChild(img);
+
+  const win=c4Check(row,col,c4Player);
+  if(win){ return c4Finish(c4Player); }
+  if(c4Board.every(r=>r.every(v=>v))){ c4Result.style.display='block'; c4Result.innerHTML='<strong>引き分け！</strong>'; return; }
+
+  c4Player=c4Player===1?2:1;
+  c4Turn.textContent=`P${c4Player}のターン`;
+  document.getElementById('c4P1').classList.toggle('turn', c4Player===1);
+  document.getElementById('c4P2').classList.toggle('turn', c4Player===2);
+}
+function c4Check(r,c,p){
+  const dirs=[[1,0],[0,1],[1,1],[1,-1]];
+  for(const [dr,dc] of dirs){
+    let count=1;
+    for(let k=1;k<4;k++){ const nr=r+dr*k,nc=c+dc*k; if(nr<0||nr>5||nc<0||nc>6||c4Board[nr][nc]!==p) break; count++; }
+    for(let k=1;k<4;k++){ const nr=r-dr*k,nc=c-dc*k; if(nr<0||nr>5||nc<0||nc>6||c4Board[nr][nc]!==p) break; count++; }
+    if(count>=4) return true;
+  }
+  return false;
+}
+function c4Finish(who){
+  c4Result.style.display='block'; c4Result.innerHTML=`<strong>🎉 P${who}の勝ち！</strong>`;
+  // セリフ
+  if(P1.id==='boss'&&P2.id==='boss'){
+    sayLine(who===1?'c4P1':'c4P2','俺が本物の店長だ！');
+    sayLine(who===1?'c4P2':'c4P1','俺に負けた…');
+  }else{
+    const winner=who===1?P1:P2, loser=who===1?P2:P1;
+    sayLine(who===1?'c4P1':'c4P2', winner.win);
+    sayLine(who===1?'c4P2':'c4P1', loser.lose);
+  }
+}
+document.getElementById('c4Again').addEventListener('click', c4Start);
+document.getElementById('toDuoFromC4').addEventListener('click', ()=>show('duoMenu'));
+document.getElementById('backTitleC').addEventListener('click', ()=>show('title'));
+
+/* ===== 神経衰弱（1人）簡易 ===== */
+const ICE = ['ice1.png','ice2.png','ice3.png','ice4.png','ice5.png','ice6.png','ice7.png'];
+function shuffled(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+
+function m1Start(){
+  const grid=document.getElementById('m1Grid'), res=document.getElementById('m1Result'), mv=document.getElementById('m1Moves');
+  res.style.display='none'; let moves=0; mv.textContent='手数: 0';
+  const deck=shuffled(ICE.slice(0,6).flatMap((v,i)=>[{id:i,img:v},{id:i,img:v}]));
+  grid.style.gridTemplateColumns='repeat(4,1fr)'; grid.innerHTML='';
+  let first=null, lock=false, matched=0;
+  deck.forEach((card,idx)=>{
+    const cell=document.createElement('div'); cell.className='memCard';
+    const inner=document.createElement('div'); inner.className='memInner'; inner.setAttribute('role','button');
+    const f=document.createElement('div'); f.className='memFace front';
+    const img=document.createElement('img'); img.src=card.img; f.appendChild(img);
+    const b=document.createElement('div'); b.className='memFace back'; b.textContent='🍨';
+    inner.appendChild(f); inner.appendChild(b); cell.appendChild(inner); grid.appendChild(cell);
+    cell.addEventListener('click', ()=>{
+      if(lock||inner.classList.contains('flipped')) return;
+      inner.classList.add('flipped');
+      if(!first){ first={idx, id:card.id, el:inner}; return; }
+      lock=true; moves++; mv.textContent=`手数: ${moves}`;
+      if(first.id===card.id){
+        setTimeout(()=>{ inner.classList.add('matched'); first.el.classList.add('matched'); matched++; first=null; lock=false;
+          if(matched===deck.length/2){ res.style.display='block'; res.innerHTML='<strong>🎉 ぜんぶそろった！</strong>'; }
+        }, 220);
+      }else{
+        setTimeout(()=>{ inner.classList.remove('flipped'); first.el.classList.remove('flipped'); first=null; lock=false; }, 700);
+      }
+    });
+  });
+}
+document.getElementById('m1Retry').addEventListener('click', m1Start);
+document.getElementById('backTitleD').addEventListener('click', ()=>show('title'));
+
+/* ===== 神経衰弱（2人：7ペア固定） ===== */
+function m2Start(){
+  const grid=document.getElementById('m2Grid'), res=document.getElementById('m2Result');
+  const scoreEl=document.getElementById('m2Score'), turnTag=document.getElementById('m2Turn');
+  res.style.display='none';
+  let P= Math.random()<0.5 ? 1 : 2; // ランダム先攻
+  scoreEl.textContent='P1:0 / P2:0（全7ペア）';
+  turnTag.textContent=`P${P}のターン`;
+  document.getElementById('m2P1').classList.toggle('turn', P===1);
+  document.getElementById('m2P2').classList.toggle('turn', P===2);
+
+  const deck = shuffled(ICE.slice(0,7).flatMap((v,i)=>[{id:i,img:v},{id:i,img:v}]));
+  grid.innerHTML=''; let first=null, lock=false, pairs=[0,0], matched=0;
+
+  deck.forEach((card,idx)=>{
+    const cell=document.createElement('div'); cell.className='memCard';
+    const inner=document.createElement('div'); inner.className='memInner';
+    const f=document.createElement('div'); f.className='memFace front'; const img=document.createElement('img'); img.src=card.img; f.appendChild(img);
+    const b=document.createElement('div'); b.className='memFace back'; b.textContent='🍨';
+    inner.appendChild(f); inner.appendChild(b); cell.appendChild(inner); grid.appendChild(cell);
+
+    cell.addEventListener('click', ()=>{
+      if(lock||inner.classList.contains('flipped')) return;
+      inner.classList.add('flipped');
+      if(!first){ first={idx,id:card.id,el:inner}; return; }
+
+      lock=true;
+      if(first.id===card.id){
+        setTimeout(()=>{ inner.classList.add('matched'); first.el.classList.add('matched'); matched++; pairs[P-1]++; scoreEl.textContent=`P1:${pairs[0]} / P2:${pairs[1]}（全7ペア）`;
+          first=null; lock=false;
+          // もう一手（同じプレイヤー続行）
+          if(matched===7){
+            res.style.display='block';
+            if(pairs[0]===pairs[1]){ res.innerHTML='<strong>引き分け！</strong>'; }
+            else{
+              const winP = pairs[0]>pairs[1]?1:2;
+              res.innerHTML=`<strong>🎉 P${winP}の勝ち！</strong>`;
+              // セリフ
+              if(P1.id==='boss'&&P2.id==='boss'){
+                sayLine(winP===1?'m2P1':'m2P2','俺が本物の店長だ！');
+                sayLine(winP===1?'m2P2':'m2P1','俺に負けた…');
+              }else{
+                const winner=winP===1?P1:P2, loser=winP===1?P2:P1;
+                sayLine(winP===1?'m2P1':'m2P2', winner.win);
+                sayLine(winP===1?'m2P2':'m2P1', loser.lose);
+              }
+            }
+          }
+        },220);
+      }else{
+        setTimeout(()=>{ inner.classList.remove('flipped'); first.el.classList.remove('flipped'); first=null; lock=false;
+          // ターン交代
+          P = P===1?2:1; turnTag.textContent=`P${P}のターン`;
+          document.getElementById('m2P1').classList.toggle('turn', P===1);
+          document.getElementById('m2P2').classList.toggle('turn', P===2);
+        },700);
+      }
+    });
+  });
+}
+document.getElementById('m2Retry').addEventListener('click', m2Start);
+document.getElementById('toDuoFromM2').addEventListener('click', ()=>show('duoMenu'));
+document.getElementById('backTitleE').addEventListener('click', ()=>show('title'));
+
+/* ===== 2048 ロジック ===== */
+const scGridBg = document.getElementById('scGridBg');
+const scTiles  = document.getElementById('scTiles');
+const scScore  = document.getElementById('scScore');
+const scBest   = document.getElementById('scBest');
+const scUndo   = document.getElementById('scUndo');
+const scRetry  = document.getElementById('scRetry');
+const scResult = document.getElementById('scResult');
+const IMAGE_LABEL={128:'屋台',256:'アイス',512:'店長',1024:'店長キメポーズ',2048:'社長'};
+let board=[],scoreNow=0,best=Number(localStorage.getItem('scoop_best')||0),prevState=null;
+function setupScoop(){
+  if(!scGridBg.childElementCount){ for(let i=0;i<16;i++){ const c=document.createElement('div'); c.className='cell'; scGridBg.appendChild(c); } }
+  best=Number(localStorage.getItem('scoop_best')||0);
+  scoreNow=0; board=new Array(16).fill(0); prevState=null; spawn(); spawn(); draw2048(); scResult.style.display='none';
+}
+function spawn(){ const zeros=board.map((v,i)=>v===0?i:null).filter(v=>v!==null); if(!zeros.length) return false; const pos=zeros[Math.floor(Math.random()*zeros.length)]; board[pos]=Math.random()<0.9?2:4; return true; }
+function canMove(){ if(board.includes(0)) return true; for(let r=0;r<4;r++)for(let c=0;c<4;c++){ const i=r*4+c,v=board[i]; if(c<3&&board[i+1]===v) return true; if(r<3&&board[i+4]===v) return true; } return false; }
+function lineMove(line){ let arr=line.filter(v=>v!==0),gain=0; for(let i=0;i<arr.length-1;i++){ if(arr[i]===arr[i+1]){ arr[i]*=2; gain+=arr[i]; arr[i+1]=0; i++; } } arr=arr.filter(v=>v!==0); while(arr.length<4) arr.push(0); return {line:arr,gain}; }
+function move(dir){
+  const before=board.slice(); prevState={board:before.slice(),score:scoreNow}; let total=0;
+  if(dir==='L'||dir==='R'){ for(let r=0;r<4;r++){ let row=board.slice(r*4,r*4+4); if(dir==='R') row.reverse(); const {line,gain}=lineMove(row); total+=gain; if(dir==='R') line.reverse(); for(let c=0;c<4;c++) board[r*4+c]=line[c]; } }
+  else{ for(let c=0;c<4;c++){ let col=[board[c],board[c+4],board[c+8],board[c+12]]; if(dir==='D') col.reverse(); const {line,gain}=lineMove(col); total+=gain; if(dir==='D') line.reverse(); [board[c],board[c+4],board[c+8],board[c+12]]=line; } }
+  if(board.join('')===before.join('')){ prevState=null; return; }
+  scoreNow+=total; if(scoreNow>best){ best=scoreNow; localStorage.setItem('scoop_best',String(best)); }
+  spawn(); draw2048(); check2048();
+}
+function draw2048(){
   scTiles.innerHTML='';
   for(let i=0;i<16;i++){
     const slot=document.createElement('div'); slot.className='slot';
-    const v=board[i]; if(v){ const t=document.createElement('div'); t.className=`tile t${v}`;
-      if(v>=128){ const img=document.createElement('img'); img.className='tileImg'; img.src=`puzzle${v}.png`; img.alt=IMAGE_LABEL[v]||String(v);
+    const v=board[i];
+    if(v){
+      const t=document.createElement('div'); t.className=`tile t${v}`;
+      if(v>=128){
+        const img=document.createElement('img'); img.className='tileImg'; img.src=`puzzle${v}.png`; img.alt=IMAGE_LABEL[v]||String(v);
         img.addEventListener('error',()=>{ img.remove(); t.innerHTML=`<b>${v}</b>`; }); t.appendChild(img);
-      } else { t.innerHTML=`<b>${v}</b>`; }
+      }else{ t.innerHTML=`<b>${v}</b>`; }
       slot.appendChild(t);
     }
     scTiles.appendChild(slot);
   }
   scScore.textContent=`スコア: ${scoreNow}`; scBest.textContent=`ベスト: ${best}`;
 }
-window.addEventListener('keydown', (e)=>{ if(scoopView.style.display!=='block') return; const k=e.key;
-  if(k==='ArrowLeft') move('L'); else if(k==='ArrowRight') move('R'); else if(k==='ArrowUp') move('U'); else if(k==='ArrowDown') move('D'); });
-let touchStartX=0,touchStartY=0; scTiles.addEventListener('touchstart',(e)=>{const t=e.touches[0];touchStartX=t.clientX;touchStartY=t.clientY;},{passive:true});
-scTiles.addEventListener('touchend',(e)=>{const t=e.changedTouches[0];const dx=t.clientX-touchStartX, dy=t.clientY-touchStartY; const ax=Math.abs(dx), ay=Math.abs(dy), TH=24; if(ax<TH && ay<TH) return; if(ax>ay) move(dx>0?'R':'L'); else move(dy>0?'D':'U');},{passive:true});
-document.querySelector('#scPad .up').addEventListener('click', ()=>move('U'));
-document.querySelector('#scPad .down').addEventListener('click', ()=>move('D'));
-document.querySelector('#scPad .left').addEventListener('click', ()=>move('L'));
-document.querySelector('#scPad .right').addEventListener('click', ()=>move('R'));
-scUndo.addEventListener('click', ()=>{ if(!prevState) return; board=prevState.board.slice(); scoreNow=prevState.score; prevState=null; draw(); scResult.style.display='none'; });
-scRetry.addEventListener('click', setupScoop);
+function check2048(){
+  const mx=Math.max(...board);
+  if(mx>=2048){ scResult.style.display='block'; scResult.innerHTML=`<strong>🎉 2048達成！${IMAGE_LABEL[2048]||''}</strong>`; }
+  if(!canMove()){ scResult.style.display='block'; scResult.innerHTML=`<strong>💥 おしまい！</strong><div style="margin-top:6px">スコア ${scoreNow}（ベスト ${best}）</div>`; }
+}
+window.addEventListener('keydown',e=>{ if(views.scoop.style.display!=='block') return; if(e.key==='ArrowLeft')move('L'); else if(e.key==='ArrowRight')move('R'); else if(e.key==='ArrowUp')move('U'); else if(e.key==='ArrowDown')move('D'); });
+let tsx=0,tsy=0;
+scTiles.addEventListener('touchstart',e=>{ const t=e.touches[0]; tsx=t.clientX; tsy=t.clientY; },{passive:true});
+scTiles.addEventListener('touchend',e=>{ const t=e.changedTouches[0]; const dx=t.clientX-tsx, dy=t.clientY-tsy, ax=Math.abs(dx), ay=Math.abs(dy), TH=24; if(ax<TH&&ay<TH) return; if(ax>ay) move(dx>0?'R':'L'); else move(dy>0?'D':'U'); },{passive:true});
+document.querySelector('#scPad .up').addEventListener('click',()=>move('U'));
+document.querySelector('#scPad .down').addEventListener('click',()=>move('D'));
+document.querySelector('#scPad .left').addEventListener('click',()=>move('L'));
+document.querySelector('#scPad .right').addEventListener('click',()=>move('R'));
+document.getElementById('scUndo').addEventListener('click',()=>{ if(!prevState) return; board=prevState.board.slice(); scoreNow=prevState.score; prevState=null; draw2048(); scResult.style.display='none'; });
+document.getElementById('scRetry').addEventListener('click', setupScoop);
+document.getElementById('scBack').addEventListener('click', ()=>{ document.getElementById('scPad').style.display='none'; show('title'); });
 
-/* =================================================
-   2人プレイ：交互にキャラ選択 → ゲーム選択
-   ================================================= */
-const vsRoster=document.getElementById('vsRoster'), vsTurnPill=document.getElementById('vsTurnPill');
-const CHAR=[ {id:1,name:'店長',img:'character1.png',coin:'coin1.png'},
-             {id:2,name:'奥さん',img:'character2.png',coin:'coin2.png'},
-             {id:3,name:'バイト',img:'character3.png',coin:'coin3.png'},
-             {id:4,name:'社長',img:'character4.png',coin:'coin4.png'} ];
-let VS={p1:null,p2:null};
-function showVersus(){ [titleView,gameView,memView,scoopView,vsGameMenu,ticView,c4View].forEach(v=>v.style.display='none'); VS={p1:null,p2:null}; vsTurnPill.textContent='P1 を選んでね'; vsView.style.display='block'; renderRoster(); window.scrollTo({top:0,behavior:'smooth'}); }
-function renderRoster(){
-  vsRoster.innerHTML='';
-  CHAR.forEach(ch=>{
-    const card=document.createElement('div'); card.className='charCard';
-    if (VS.p1 && VS.p1.id===ch.id) card.classList.add('disabled'); // 同キャラは静かに不可
-    const img=document.createElement('img'); img.src=ch.img; img.alt=ch.name;
-    const cap=document.createElement('div'); cap.className='charName'; cap.textContent=ch.name;
-    card.append(img,cap);
-    card.addEventListener('click',()=>{
-      if(!VS.p1){ VS.p1=ch; vsTurnPill.textContent='P2 を選んでね'; renderRoster(); return; }
-      if(!VS.p2){ if(VS.p1.id===ch.id) return; VS.p2=ch; showVsGameMenu(); }
-    });
-    vsRoster.appendChild(card);
-  });
-}
-function showVsGameMenu(){ vsView.style.display='none'; vsGameMenu.style.display='block'; }
-document.getElementById('vsBack').addEventListener('click', showTitle);
-document.getElementById('vsGameBack').addEventListener('click', showVersus);
-document.getElementById('vsGameToTitle').addEventListener('click', showTitle);
-
-/* =================================================
-   ◯✕ゲーム（2人） 先攻/後攻ランダム・赤枠でターン表示
-   ================================================= */
-const ticGrid=document.getElementById('ticGrid'), ticTurn=document.getElementById('ticTurn'), ticResult=document.getElementById('ticResult');
-const ticP1pic=document.getElementById('ticP1pic'), ticP2pic=document.getElementById('ticP2pic');
-const ticP1name=document.getElementById('ticP1name'), ticP2name=document.getElementById('ticP2name');
-const ticP1say=document.getElementById('ticP1say'), ticP2say=document.getElementById('ticP2say');
-const ticBadge1=document.getElementById('ticP1'), ticBadge2=document.getElementById('ticP2');
-let ticBoard, ticTurnNum, ticOver=false;
-const LINES={1:{win:'俺に勝とうなんて100年早い！',lose:'いやーん！'},
-             2:{win:'私が1番よ！',lose:'あんた減給ね…'},
-             3:{win:'やったっす！',lose:'マジか…'},
-             4:{win:'ふふ、当然だね',lose:'次は勝つよ'}};
-function startTicTacToe(V){
-  [titleView,gameView,memView,scoopView,vsView,vsGameMenu,c4View].forEach(v=>v.style.display='none'); ticView.style.display='block';
-  // VSを保持
-  window._VS = V;
-  ticP1pic.src=V.p1.img; ticP2pic.src=V.p2.img; ticP1name.textContent=V.p1.name; ticP2name.textContent=V.p2.name;
-  ticBoard=new Array(9).fill(null);
-  ticGrid.innerHTML=''; for(let i=0;i<9;i++){ const c=document.createElement('div'); c.className='ticCell'; c.dataset.i=i; c.addEventListener('click',()=>ticClick(i,c)); ticGrid.appendChild(c); }
-  ticOver=false;
-  // 先攻ランダム
-  ticTurnNum = Math.random()<0.5 ? 1 : 2; updateTicHud();
-  ticResult.style.display='none';
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-function updateTicHud(){
-  ticTurn.textContent = `P${ticTurnNum}のターン`;
-  ticBadge1.classList.toggle('turnRing', ticTurnNum===1);
-  ticBadge2.classList.toggle('turnRing', ticTurnNum===2);
-}
-function ticClick(i,cell){
-  if(ticOver || ticBoard[i]) return;
-  ticBoard[i] = (ticTurnNum===1?'X':'O');
-  cell.textContent = ticBoard[i]; cell.classList.add('mark');
-  // 勝敗判定
-  const w = ticWinner();
-  if(w){ finishTic(w); return; }
-  if(!ticBoard.includes(null)){ ticResult.style.display='block'; ticResult.innerHTML=`<strong>🤝 引き分け！</strong>`; ticOver=true; return; }
-  ticTurnNum = ticTurnNum===1?2:1; updateTicHud();
-}
-function ticWinner(){
-  const b=ticBoard, L=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-  for(const [a,c,d] of L){ if(b[a] && b[a]===b[c] && b[a]===b[d]) return (b[a]==='X'?1:2); }
-  return 0;
-}
-function finishTic(winner){
-  ticOver=true; const loser = winner===1?2:1;
-  ticResult.style.display='block'; ticResult.innerHTML=`<strong>🎉 P${winner}の勝ち！</strong>`;
-  // セリフ
-  const idW = window._VS[winner===1?'p1':'p2'].id, idL = window._VS[loser===1?'p1':'p2'].id;
-  ticP1say.textContent = (winner===1? LINES[idW].win : LINES[idL].lose );
-  ticP2say.textContent = (winner===2? LINES[idW].win : LINES[idL].lose );
-}
-document.getElementById('ticRetry').addEventListener('click', ()=>startTicTacToe(window._VS));
-document.getElementById('ticOther').addEventListener('click', ()=>{ ticView.style.display='none'; vsGameMenu.style.display='block'; });
-document.getElementById('ticBack').addEventListener('click', showTitle);
-
-/* =================================================
-   四目並べ（2人） 簡易落下アニメ
-   ================================================= */
-const c4GridEl=document.getElementById('c4Grid'), c4Pointers=document.getElementById('c4Pointers'), c4TurnEl=document.getElementById('c4Turn'), c4Result=document.getElementById('c4Result');
-const c4P1pic=document.getElementById('c4P1pic'), c4P2pic=document.getElementById('c4P2pic');
-const c4P1name=document.getElementById('c4P1name'), c4P2name=document.getElementById('c4P2name');
-const c4Badge1=document.getElementById('c4P1'), c4Badge2=document.getElementById('c4P2');
-let C4, c4TurnNum, c4Over=false;
-function startConnect4(V){
-  [titleView,gameView,memView,scoopView,vsView,vsGameMenu,ticView].forEach(v=>v.style.display='none'); c4View.style.display='block';
-  window._VS=V; C4={cols:7,rows:6,board:Array.from({length:6},()=>Array(7).fill(0))};
-  c4P1pic.src=V.p1.img; c4P2pic.src=V.p2.img; c4P1name.textContent=V.p1.name; c4P2name.textContent=V.p2.name;
-  c4GridEl.innerHTML=''; for(let r=0;r<C4.rows;r++)for(let c=0;c<C4.cols;c++){ const cell=document.createElement('div'); cell.className='c4Cell'; cell.dataset.r=r; cell.dataset.c=c; c4GridEl.appendChild(cell); }
-  c4Pointers.innerHTML=''; for(let c=0;c<C4.cols;c++){ const b=document.createElement('button'); b.addEventListener('click',()=>c4Drop(c)); c4Pointers.appendChild(b); }
-  c4Over=false; c4TurnNum = Math.random()<0.5?1:2; updateC4Hud();
-  c4Result.style.display='none'; window.scrollTo({top:0,behavior:'smooth'});
-}
-function updateC4Hud(){
-  c4TurnEl.textContent=`P${c4TurnNum}のターン`;
-  c4Badge1.classList.toggle('turnRing', c4TurnNum===1);
-  c4Badge2.classList.toggle('turnRing', c4TurnNum===2);
-}
-function c4Drop(col){
-  if(c4Over) return;
-  // 最下段の空きを探す
-  let row=-1; for(let r=C4.rows-1;r>=0;r--){ if(C4.board[r][col]===0){ row=r; break; } }
-  if(row===-1) return; // いっぱい
-  const pid=c4TurnNum;
-  C4.board[row][col]=pid;
-  // 見た目：落下アニメ（セル内から上方向→0へ）
-  const cell=[...c4GridEl.children][row*C4.cols+col];
-  const img=document.createElement('img'); img.className='chip'; img.style.setProperty('--r', (row+1)); img.src = pid===1? window._VS.p1.coin : window._VS.p2.coin; img.alt='coin';
-  cell.appendChild(img);
-
-  // 判定
-  if (c4WinAt(row,col,pid)){ finishC4(pid); return; }
-  if (C4.board.every(r=>r.every(v=>v!==0))){ c4Result.style.display='block'; c4Result.innerHTML='<strong>🤝 引き分け！</strong>'; c4Over=true; return; }
-  c4TurnNum = c4TurnNum===1?2:1; updateC4Hud();
-}
-function c4WinAt(r,c,p){
-  const dirs=[[1,0],[0,1],[1,1],[1,-1]];
-  for(const [dr,dc] of dirs){
-    let cnt=1;
-    for(let s=1;s<4;s++){ const nr=r+dr*s, nc=c+dc*s; if(nr<0||nr>=C4.rows||nc<0||nc>=C4.cols) break; if(C4.board[nr][nc]===p) cnt++; else break; }
-    for(let s=1;s<4;s++){ const nr=r-dr*s, nc=c-dc*s; if(nr<0||nr>=C4.rows||nc<0||nc>=C4.cols) break; if(C4.board[nr][nc]===p) cnt++; else break; }
-    if(cnt>=4) return true;
-  }
-  return false;
-}
-function finishC4(winner){
-  c4Over=true; c4Result.style.display='block'; c4Result.innerHTML=`<strong>🎉 P${winner}の勝ち！</strong>`;
-}
-document.getElementById('c4Retry').addEventListener('click', ()=>startConnect4(window._VS));
-document.getElementById('c4Other').addEventListener('click', ()=>{ c4View.style.display='none'; vsGameMenu.style.display='block'; });
-document.getElementById('c4Back').addEventListener('click', showTitle);
-
-/* 2人メニュー遷移ボタン */
-document.getElementById('goTic').addEventListener('click', ()=>startTicTacToe(VS));
-document.getElementById('goConnect4').addEventListener('click', ()=>startConnect4(VS));
-
+/* ===== じゃんけん ロジック（簡略） ===== */
+const jkScoreEl=document.getElementById('jkScore'), jkMsg=document.getElementById('jkMsg'), jkResult=document.getElementById('jkResult');
+const bossHandImg=document.getElementById('bossHandImg'); const JKIMG={rock:'rock2.png',scissors:'scissors2.png',paper:'paper2.png'};
+const WINMAP={rock:'scissors',scissors:'paper',paper:'rock'}; let jkScoreYou=0,jkScoreBoss=0; const WIN_TARGET=3, EDGE=.7;
+function jkReset(){ jkScoreYou=0;jkScoreBoss=0;jkUpdate(); jkMsg.textContent='手を選んでね！'; jkResult.style.display='none'; bossHandImg.src=JKIMG.rock; }
+function jkUpdate(){ jkScoreEl.textContent=`あなた ${jkScoreYou} - 店長 ${jkScoreBoss}`; }
+function bossPick(p){ const beat={rock:'paper',paper:'scissors',scissors:'rock'}[p]; const lose=WINMAP[p]; const tie=p; if(Math.random()<EDGE) return beat; return Math.random()<.5?lose:tie; }
+document.querySelectorAll('.handBtn').forEach(b=>b.addEventListener('click',()=>{ const p=b.dataset.hand; const boss=bossPick(p); bossHandImg.src=JKIMG[boss];
+  if(p===boss){ jkMsg.textContent='あいこ！次の手を選んでね'; }
+  else if(WINMAP[p]===boss){ jkScoreYou++; jkUpdate(); jkMsg.innerHTML='<span class="win">あなたの勝ち！</span> 次の手を選んでね'; }
+  else{ jkScoreBoss++; jkUpdate(); jkMsg.innerHTML='<span class="lose">店長の勝ち！</span> 次の手を選んでね'; }
+  if(jkScoreYou>=WIN_TARGET||jkScoreBoss>=WIN_TARGET){ jkResult.style.display='block'; jkResult.innerHTML = jkScoreYou>jkScoreBoss?'<strong>🎉 あなたの勝ち！</strong>':'<strong>👑 店長の勝ち！</strong>'; }
+}));
+document.getElementById('jkRetry').addEventListener('click', jkReset);
+document.getElementById('backTitleA').addEventListener('click', ()=>show('title'));
 </script>
 </body>
 </html>
