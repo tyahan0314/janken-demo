@@ -127,6 +127,7 @@
   .scTiles{
     display:grid;
     grid-template-columns: repeat(var(--cols), var(--tile));
+    grid-template-rows:    repeat(var(--cols), var(--tile)); 
     gap: var(--gap);
     padding: var(--pad);
     border-radius:14px;
@@ -706,37 +707,44 @@
     }
   }
 
-  function draw(){
-    scTiles.innerHTML='';
-    for(let i=0;i<16;i++){
-      const v = board[i];
-      if (!v) { const ph = document.createElement('div'); scTiles.appendChild(ph); continue; }
-      const t = document.createElement('div');
-      t.className = `tile t${v}`;
+ function draw(){
+  scTiles.innerHTML = '';
+  for(let i=0;i<16;i++){
+    const v = board[i];
 
-      const digits = String(v).length;
-      if (digits===3) t.classList.add('big');
-      if (digits>=4)  t.classList.add('huge');
-
-      if (v >= 128){
-        const img = document.createElement('img');
-        img.className = 'tileImg';
-        img.src = `puzzle${v}.png`;
-        img.alt = IMAGE_LABEL[v] || String(v);
-        img.addEventListener('error', ()=>{
-          img.remove();
-          t.innerHTML = `<b>${v}</b>`;
-        });
-        t.appendChild(img);
-      } else {
-        t.innerHTML = `<b>${v}</b>`;
-      }
-
-      scTiles.appendChild(t);
+    // 空マスでもサイズをもつ透明タイルを置く（グリッドの形を維持）
+    if (!v) {
+      const ph = document.createElement('div');
+      ph.className = 'tile ph';
+      scTiles.appendChild(ph);
+      continue;
     }
-    scScore.textContent = `スコア: ${scoreNow}`;
-    scBest.textContent  = `ベスト: ${best}`;
+
+    const t = document.createElement('div');
+    t.className = `tile t${v}`;
+
+    const digits = String(v).length;
+    if (digits===3) t.classList.add('big');
+    if (digits>=4)  t.classList.add('huge');
+
+    if (v >= 128){
+      const img = document.createElement('img');
+      img.className = 'tileImg';
+      img.src = `puzzle${v}.png`;
+      img.alt = IMAGE_LABEL[v] || String(v);
+      img.addEventListener('error', ()=>{
+        img.remove();
+        t.innerHTML = `<b>${v}</b>`;
+      });
+      t.appendChild(img);
+    } else {
+      t.innerHTML = `<b>${v}</b>`;
+    }
+    scTiles.appendChild(t);
   }
+  scScore.textContent = `スコア: ${scoreNow}`;
+  scBest.textContent  = `ベスト: ${best}`;
+}
 
   // 入力（キーボード・スワイプ・矢印パッド）
   window.addEventListener('keydown', (e)=>{
