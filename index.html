@@ -619,6 +619,8 @@
     scoreNow = 0; board = new Array(16).fill(0); prevState=null;
     spawn(); spawn();
     setBoardTileSize();  // ← 盤サイズに合わせて--tile更新
+    window.addEventListener('orientationchange', ()=> setTimeout(setBoardTileSize, 50));
+new ResizeObserver(()=> setBoardTileSize()).observe(boardWrap);
     draw();
     scResult.style.display='none';
   }
